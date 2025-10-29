@@ -4,8 +4,8 @@ import controller.BattleController;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import model.Battle;
 import model.Animal;
+import model.Battle;
 import model.factories.AnimalFactory;
 import view.BattleView;
 
@@ -15,7 +15,8 @@ public class MainApp extends Application {
     public void start(Stage stage) {
         // Player = Cagou, IA = Tricot Rayé
         Animal player = AnimalFactory.createAnimal("cagou");
-        Animal ia = AnimalFactory.createAnimal("tricot rayé");
+        Animal ia = AnimalFactory.createAnimal("tricot raye");  
+
 
         Battle battle = new Battle(player, ia);
         BattleController controller = new BattleController(battle);

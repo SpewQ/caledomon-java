@@ -1,5 +1,7 @@
 model\actions\AttackAction.class
+model\actions\cagou\DanseDuSol.class
 model\animals\TricotRaye.class
+model\actions\cagou\SautDeBrousse.class
 view\BattleView.class
 model\Animal.class
 model\animals\Gecko.class
@@ -8,9 +10,11 @@ model\actions\SpecialAction.class
 model\actions\Action.class
 main\MainApp.class
 controller\BattleController.class
+model\actions\cagou\CriAlerte.class
 model\actions\HealAction.class
 model\Etat.class
 model\Type.class
+model\actions\cagou\CoupDeBec.class
 model\animals\Cagou.class
 model\factories\AnimalFactory.class
 model\Battle.class

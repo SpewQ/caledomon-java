@@ -23,10 +23,11 @@ public class BattleView extends BorderPane {
     private final ProgressBar pbIaHp = new ProgressBar(1.0);
     private final Label lblIaHp = new Label("0/0");
 
-    private final Button btnAttack  = new Button("Attaquer");
-    private final Button btnDefend  = new Button("Défendre");
-    private final Button btnHeal    = new Button("Soigner");
-    private final Button btnSpecial = new Button("Spéciale");
+    // Noms des boutons inspirés Pokémon (pour le Cagou)
+    private final Button btn1 = new Button("Coup de Bec");
+    private final Button btn2 = new Button("Cri dAlerte");
+    private final Button btn3 = new Button("Saut de Brousse");
+    private final Button btn4 = new Button("Danse du Sol");
 
     private final TextArea messages = new TextArea();
 
@@ -47,7 +48,7 @@ public class BattleView extends BorderPane {
         right.setAlignment(Pos.CENTER_RIGHT);
         right.setPadding(new Insets(10));
 
-        HBox buttons = new HBox(10, btnAttack, btnDefend, btnHeal, btnSpecial);
+        HBox buttons = new HBox(10, btn1, btn2, btn3, btn4);
         buttons.setAlignment(Pos.CENTER);
         buttons.setPadding(new Insets(10));
 
@@ -64,10 +65,11 @@ public class BattleView extends BorderPane {
     }
 
     private void wireActions() {
-        btnAttack.setOnAction(e -> controller.onPlayerAction("attaquer"));
-        btnDefend.setOnAction(e -> controller.onPlayerAction("defendre"));
-        btnHeal.setOnAction(e -> controller.onPlayerAction("soigner"));
-        btnSpecial.setOnAction(e -> controller.onPlayerAction("speciale"));
+        // on transmet des clés simples au contrôleur
+        btn1.setOnAction(e -> controller.onPlayerAction("coup"));
+        btn2.setOnAction(e -> controller.onPlayerAction("cri"));
+        btn3.setOnAction(e -> controller.onPlayerAction("saut"));
+        btn4.setOnAction(e -> controller.onPlayerAction("danse"));
     }
 
     public void bindNames(String playerName, String iaName) {
@@ -89,9 +91,9 @@ public class BattleView extends BorderPane {
     }
 
     public void disableActions() {
-        btnAttack.setDisable(true);
-        btnDefend.setDisable(true);
-        btnHeal.setDisable(true);
-        btnSpecial.setDisable(true);
+        btn1.setDisable(true);
+        btn2.setDisable(true);
+        btn3.setDisable(true);
+        btn4.setDisable(true);
     }
 }

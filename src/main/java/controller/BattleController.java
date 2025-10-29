@@ -1,14 +1,18 @@
 package controller;
 
+import java.util.Random;
+
 import model.Battle;
 import model.actions.Action;
 import model.actions.AttackAction;
 import model.actions.DefendAction;
 import model.actions.HealAction;
 import model.actions.SpecialAction;
+import model.actions.cagou.CoupDeBec;
+import model.actions.cagou.CriAlerte;
+import model.actions.cagou.DanseDuSol;
+import model.actions.cagou.SautDeBrousse;
 import view.BattleView;
-
-import java.util.Random;
 
 public class BattleController {
     private final Battle battle;
@@ -32,16 +36,23 @@ public class BattleController {
         }
     }
 
-    public void onPlayerAction(String actionName) {
+    public void onPlayerAction(String actionKey) {
         if (battle.combatTermine()) {
             view.appendMessage("Le combat est terminé.");
             view.disableActions();
             return;
         }
 
-        Action playerAction = parseAction(actionName);
+        // Actions du joueur (Cagou)
+        Action playerAction = mapPlayerAction(actionKey);
+
+        // IA (on garde l’ancienne logique pour l’instant)
         Action iaAction = randomIaAction();
 
+        // Option 1 : ordre via Battle.jouerTour(...) (si vous utilisez l’ordre par vitesse)
+        // battle.jouerTour(playerAction, iaAction);
+
+        // Option 2 : exécution simple joueur puis IA (plus direct)
         playerAction.executer(battle.getJoueur1(), battle.getJoueur2());
         if (!battle.combatTermine()) {
             iaAction.executer(battle.getJoueur2(), battle.getJoueur1());
@@ -49,7 +60,7 @@ public class BattleController {
 
         view.refreshHp(battle.getJoueur1().getPv(), battle.getJoueur2().getPv(),
                        battle.getJoueur1().getMaxPv(), battle.getJoueur2().getMaxPv());
-        view.appendMessage("Joueur: " + actionLabel(playerAction) + " | IA: " + actionLabel(iaAction));
+        view.appendMessage("Joueur: " + label(playerAction) + " | IA: " + label(iaAction));
         view.appendMessage("PV Joueur: " + battle.getJoueur1().getPv() +
                            " | PV IA: " + battle.getJoueur2().getPv());
 
@@ -62,13 +73,14 @@ public class BattleController {
         }
     }
 
-    private Action parseAction(String name) {
-        switch (name.toLowerCase()) {
-            case "attaquer": return new AttackAction();
-            case "defendre": return new DefendAction();
-            case "soigner":  return new HealAction();
-            case "speciale":
-            default:         return new SpecialAction();
+    private Action mapPlayerAction(String key) {
+        // keys venant des boutons : "coup", "cri", "saut", "danse"
+        switch (key) {
+            case "coup":  return new CoupDeBec();
+            case "cri":   return new CriAlerte();
+            case "saut":  return new SautDeBrousse();
+            case "danse": return new DanseDuSol();
+            default:      return new CoupDeBec();
         }
     }
 
@@ -82,10 +94,16 @@ public class BattleController {
         }
     }
 
-    private String actionLabel(Action a) {
-        if (a instanceof AttackAction) return "Attaquer";
-        if (a instanceof DefendAction) return "Défendre";
-        if (a instanceof HealAction)   return "Soigner";
-        return "Spéciale";
+    private String label(Action a) {
+        // labels côté log
+        if (a instanceof CoupDeBec)     return "Coup de Bec";
+        if (a instanceof CriAlerte)     return "Cri d'Alerte";
+        if (a instanceof SautDeBrousse) return "Saut de Brousse";
+        if (a instanceof DanseDuSol)    return "Danse du Sol";
+        if (a instanceof AttackAction)  return "Attaquer";
+        if (a instanceof DefendAction)  return "Défendre";
+        if (a instanceof HealAction)    return "Soigner";
+        if (a instanceof SpecialAction) return "Spéciale";
+        return a.getClass().getSimpleName();
     }
 }
