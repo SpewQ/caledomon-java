@@ -27,55 +27,62 @@ public class BattleController {
         this.view = view;
     }
 
+    /**
+     * Lance le combat et initialise l'affichage (noms, PV, images...).
+     */
     public void startBattle() {
         if (view != null) {
+            // Noms et points de vie
             view.bindNames(battle.getJoueur1().getNom(), battle.getJoueur2().getNom());
-            view.refreshHp(battle.getJoueur1().getPv(), battle.getJoueur2().getPv(),
-                           battle.getJoueur1().getMaxPv(), battle.getJoueur2().getMaxPv());
-            view.appendMessage("Le combat commence !");
+            view.refreshHp(
+                battle.getJoueur1().getPv(), battle.getJoueur2().getPv(),
+                battle.getJoueur1().getMaxPv(), battle.getJoueur2().getMaxPv()
+            );
+
+            // 🔹 Affiche les images des Calédomon au-dessus des noms
+            view.setImages(
+                battle.getJoueur1().getNom(),
+                battle.getJoueur2().getNom()
+            );
+
+            view.addLog("Le combat commence !");
         }
     }
 
-    public void onPlayerAction(String actionKey) {
+    public void onPlayerAction(String actionName) {
         if (battle.combatTermine()) {
-            view.appendMessage("Le combat est terminé.");
+            view.addLog("Le combat est terminé.");
             view.disableActions();
             return;
         }
 
-        // Actions du joueur (Cagou)
-        Action playerAction = mapPlayerAction(actionKey);
-
-        // IA (on garde l’ancienne logique pour l’instant)
+        Action playerAction = parseAction(actionName);
         Action iaAction = randomIaAction();
 
-        // Option 1 : ordre via Battle.jouerTour(...) (si vous utilisez l’ordre par vitesse)
-        // battle.jouerTour(playerAction, iaAction);
-
-        // Option 2 : exécution simple joueur puis IA (plus direct)
         playerAction.executer(battle.getJoueur1(), battle.getJoueur2());
         if (!battle.combatTermine()) {
             iaAction.executer(battle.getJoueur2(), battle.getJoueur1());
         }
 
-        view.refreshHp(battle.getJoueur1().getPv(), battle.getJoueur2().getPv(),
-                       battle.getJoueur1().getMaxPv(), battle.getJoueur2().getMaxPv());
-        view.appendMessage("Joueur: " + label(playerAction) + " | IA: " + label(iaAction));
-        view.appendMessage("PV Joueur: " + battle.getJoueur1().getPv() +
-                           " | PV IA: " + battle.getJoueur2().getPv());
+        view.refreshHp(
+            battle.getJoueur1().getPv(), battle.getJoueur2().getPv(),
+            battle.getJoueur1().getMaxPv(), battle.getJoueur2().getMaxPv()
+        );
+        view.addLog("Joueur: " + actionLabel(playerAction) + " | IA: " + actionLabel(iaAction));
+        view.addLog("PV Joueur: " + battle.getJoueur1().getPv() +
+                    " | PV IA: " + battle.getJoueur2().getPv());
 
         if (battle.combatTermine()) {
             String result = (battle.getJoueur1().estVivant())
                     ? "Victoire du joueur !"
                     : "Défaite...";
-            view.appendMessage(result);
+            view.addLog(result);
             view.disableActions();
         }
     }
 
-    private Action mapPlayerAction(String key) {
-        // keys venant des boutons : "coup", "cri", "saut", "danse"
-        switch (key) {
+    private Action parseAction(String name) {
+        switch (name.toLowerCase()) {
             case "coup":  return new CoupDeBec();
             case "cri":   return new CriAlerte();
             case "saut":  return new SautDeBrousse();
@@ -94,7 +101,7 @@ public class BattleController {
         }
     }
 
-    private String label(Action a) {
+    private String actionLabel(Action a) {
         // labels côté log
         if (a instanceof CoupDeBec)     return "Coup de Bec";
         if (a instanceof CriAlerte)     return "Cri d'Alerte";
@@ -104,6 +111,6 @@ public class BattleController {
         if (a instanceof DefendAction)  return "Défendre";
         if (a instanceof HealAction)    return "Soigner";
         if (a instanceof SpecialAction) return "Spéciale";
-        return a.getClass().getSimpleName();
+        return "Spéciale";
     }
 }

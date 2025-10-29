@@ -7,9 +7,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+
 
 public class BattleView extends BorderPane {
 
@@ -23,13 +26,16 @@ public class BattleView extends BorderPane {
     private final ProgressBar pbIaHp = new ProgressBar(1.0);
     private final Label lblIaHp = new Label("0/0");
 
+    private final ImageView imgPlayer = new ImageView();
+    private final ImageView imgIa = new ImageView();
+
     // Noms des boutons inspirés Pokémon (pour le Cagou)
     private final Button btn1 = new Button("Coup de Bec");
     private final Button btn2 = new Button("Cri dAlerte");
     private final Button btn3 = new Button("Saut de Brousse");
     private final Button btn4 = new Button("Danse du Sol");
 
-    private final TextArea messages = new TextArea();
+    private final TextArea taLog = new TextArea();
 
     public BattleView(BattleController controller) {
         this.controller = controller;
@@ -38,30 +44,35 @@ public class BattleView extends BorderPane {
     }
 
     private void buildUI() {
-        setPadding(new Insets(10));
+        // --- Images setup ---
+        imgPlayer.setFitHeight(120);
+        imgPlayer.setPreserveRatio(true);
+        imgIa.setFitHeight(120);
+        imgIa.setPreserveRatio(true);
 
-        VBox left = new VBox(8, lblPlayerName, pbPlayerHp, lblPlayerHp);
-        left.setAlignment(Pos.CENTER_LEFT);
-        left.setPadding(new Insets(10));
+        // --- Joueur ---
+        VBox playerBox = new VBox(5, imgPlayer, lblPlayerName, pbPlayerHp, lblPlayerHp);
+        playerBox.setAlignment(Pos.CENTER);
 
-        VBox right = new VBox(8, lblIaName, pbIaHp, lblIaHp);
-        right.setAlignment(Pos.CENTER_RIGHT);
-        right.setPadding(new Insets(10));
+        // --- IA ---
+        VBox iaBox = new VBox(5, imgIa, lblIaName, pbIaHp, lblIaHp);
+        iaBox.setAlignment(Pos.CENTER);
 
-        HBox buttons = new HBox(10, btn1, btn2, btn3, btn4);
-        buttons.setAlignment(Pos.CENTER);
-        buttons.setPadding(new Insets(10));
+        // --- Zone centrale ---
+        HBox battleBox = new HBox(50, playerBox, iaBox);
+        battleBox.setAlignment(Pos.CENTER);
+        setCenter(battleBox);
 
-        messages.setEditable(false);
-        messages.setWrapText(true);
-        messages.setPrefRowCount(10);
+        // --- Boutons d’action ---
+        HBox actionBox = new HBox(10, btn1, btn2, btn3, btn4);
+        actionBox.setAlignment(Pos.CENTER);
+        actionBox.setPadding(new Insets(10));
+        setBottom(actionBox);
 
-        VBox center = new VBox(10, buttons, messages);
-        center.setPadding(new Insets(10));
-
-        setLeft(left);
-        setRight(right);
-        setCenter(center);
+        // --- Zone de log ---
+        taLog.setEditable(false);
+        taLog.setPrefHeight(120);
+        setTop(taLog);
     }
 
     private void wireActions() {
@@ -77,6 +88,18 @@ public class BattleView extends BorderPane {
         lblIaName.setText(iaName);
     }
 
+    public void setImages(String playerName, String iaName) {
+        try {
+            String pathPlayer = "/images/" + playerName.toLowerCase() + ".jpg";
+            String pathIa = "/images/" + iaName.toLowerCase() + ".jpg";
+
+            imgPlayer.setImage(new Image(getClass().getResourceAsStream(pathPlayer)));
+            imgIa.setImage(new Image(getClass().getResourceAsStream(pathIa)));
+        } catch (Exception e) {
+            System.err.println("Erreur lors du chargement des images : " + e.getMessage());
+        }
+    }
+
     public void refreshHp(int playerPv, int iaPv, int playerMax, int iaMax) {
         double pRatio = Math.max(0, Math.min(1.0, (double) playerPv / Math.max(1, playerMax)));
         double iRatio = Math.max(0, Math.min(1.0, (double) iaPv / Math.max(1, iaMax)));
@@ -86,8 +109,8 @@ public class BattleView extends BorderPane {
         lblIaHp.setText(iaPv + " / " + iaMax);
     }
 
-    public void appendMessage(String msg) {
-        messages.appendText(msg + "\n");
+    public void addLog(String message) {
+        taLog.appendText(message + "\n");
     }
 
     public void disableActions() {
