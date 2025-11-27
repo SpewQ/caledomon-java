@@ -3,6 +3,7 @@ package controller;
 import java.util.Random;
 
 import model.Battle;
+import model.EnvironmentType;
 import model.actions.Action;
 import model.actions.AttackAction;
 import model.actions.DefendAction;
@@ -32,6 +33,12 @@ public class BattleController {
      */
     public void startBattle() {
         if (view != null) {
+
+            // Tirage aléatoire de l'environnement
+            EnvironmentType env = EnvironmentType.random();
+            view.setEnvironment(env);                          // ✅ appel sur l'instance
+            view.addLog("Environnement : " + env.name());      // ✅ appel sur l'instance
+
             // Noms et points de vie
             view.bindNames(battle.getJoueur1().getNom(), battle.getJoueur2().getNom());
             view.refreshHp(
@@ -39,7 +46,7 @@ public class BattleController {
                 battle.getJoueur1().getMaxPv(), battle.getJoueur2().getMaxPv()
             );
 
-            // 🔹 Affiche les images des Calédomon au-dessus des noms
+            // Images des Calédomon
             view.setImages(
                 battle.getJoueur1().getNom(),
                 battle.getJoueur2().getNom()
@@ -102,7 +109,6 @@ public class BattleController {
     }
 
     private String actionLabel(Action a) {
-        // labels côté log
         if (a instanceof CoupDeBec)     return "Coup de Bec";
         if (a instanceof CriAlerte)     return "Cri d'Alerte";
         if (a instanceof SautDeBrousse) return "Saut de Brousse";

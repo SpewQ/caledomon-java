@@ -1,12 +1,13 @@
 package model.animals;
 
 import model.Animal;
-import model.Type;
 import model.Etat;
+import model.Type;
 
 public class TricotRaye extends Animal {
     public TricotRaye() {
         super("Tricot Rayé", 80, 18, 6, 10, Type.MARIN);
+
     }
 
     @Override

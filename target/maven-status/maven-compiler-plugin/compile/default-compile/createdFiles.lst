@@ -14,8 +14,10 @@ model\actions\cagou\CoupDeBec.class
 model\Battle.class
 model\actions\tricotraye\EcailleToxique.class
 model\animals\TricotRaye.class
+view\BattleView$1.class
 model\actions\tricotraye\ContractionSerpentine.class
 model\actions\Action.class
+model\EnvironmentType.class
 controller\BattleController.class
 model\actions\cagou\CriAlerte.class
 model\actions\tricotraye\MorsureVenimeuse.class
