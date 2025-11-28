@@ -11,6 +11,7 @@ model\actions\HealAction.class
 model\Etat.class
 model\Type.class
 model\actions\cagou\CoupDeBec.class
+controller\SelectionController.class
 model\Battle.class
 model\actions\tricotraye\EcailleToxique.class
 model\animals\TricotRaye.class
@@ -22,5 +23,7 @@ controller\BattleController.class
 model\actions\cagou\CriAlerte.class
 model\actions\tricotraye\MorsureVenimeuse.class
 model\animals\Cagou.class
+view\ResultView.class
 model\actions\tricotraye\SouffleDraconique.class
 model\factories\AnimalFactory.class
+view\SelectionView.class

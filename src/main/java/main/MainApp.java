@@ -1,35 +1,22 @@
 package main;
 
-import controller.BattleController;
+import controller.SelectionController;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import model.Animal;
-import model.Battle;
-import model.factories.AnimalFactory;
-import view.BattleView;
+import view.SelectionView;
 
 public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) {
-        // Player = Cagou, IA = Tricot Rayé
-        Animal player = AnimalFactory.createAnimal("cagou");
-        Animal ia = AnimalFactory.createAnimal("tricot raye");  
+        SelectionView selectionView = new SelectionView();
+        new SelectionController(stage, selectionView);
 
-
-        Battle battle = new Battle(player, ia);
-        BattleController controller = new BattleController(battle);
-        BattleView view = new BattleView(controller);
-
-        controller.setView(view);
-        controller.startBattle();
-
-        Scene scene = new Scene(view);
-        stage.setTitle("Caledomon RPG");
-        stage.setScene(scene);
-        stage.sizeToScene(); // auto-adjust
-        stage.setResizable(true);
+        Scene selectionScene = new Scene(selectionView, 800, 500);
+        stage.setTitle("Sélection du Calédomon");
+        stage.setScene(selectionScene);
+        stage.sizeToScene();
         stage.show();
     }
 

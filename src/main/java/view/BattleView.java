@@ -1,5 +1,8 @@
 package view;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import controller.BattleController;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -14,6 +17,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import model.EnvironmentType;
+import model.actions.Action;
 
 public class BattleView extends BorderPane {
 
@@ -34,17 +38,15 @@ public class BattleView extends BorderPane {
     private final ImageView imgPlayerPlatform = new ImageView();
     private final ImageView imgIaPlatform = new ImageView();
 
-    private final Button btn1 = new Button("Coup de Bec");
-    private final Button btn2 = new Button("Cri d'Alerte");
-    private final Button btn3 = new Button("Saut de Brousse");
-    private final Button btn4 = new Button("Danse du Sol");
+    // boutons dynamiques (remplace btn1..4 statiques)
+    private final List<Button> actionButtons = new ArrayList<>();
 
     private final TextArea taLog = new TextArea();
 
     public BattleView(BattleController controller) {
         this.controller = controller;
         buildUI();
-        wireActions();
+        // wireActions is not used for static buttons anymore
     }
 
     private void buildUI() {
@@ -93,10 +95,17 @@ public class BattleView extends BorderPane {
         battleBox.setPadding(new Insets(20));
         setCenter(battleBox);
 
-        // --- Boutons ---
-        HBox actionBox = new HBox(10, btn1, btn2, btn3, btn4);
+        // --- Boutons (placeholder HBox, les boutons seront ajoutés dynamiquement) ---
+        HBox actionBox = new HBox(10);
         actionBox.setAlignment(Pos.CENTER);
         actionBox.setPadding(new Insets(10));
+        // crée 4 boutons vides pour respecter la mise en page initiale
+        for (int i = 0; i < 4; i++) {
+            Button b = new Button("-");
+            b.setPrefWidth(160);
+            actionButtons.add(b);
+            actionBox.getChildren().add(b);
+        }
         setBottom(actionBox);
 
         // --- Zone de log ---
@@ -106,11 +115,26 @@ public class BattleView extends BorderPane {
         setTop(taLog);
     }
 
-    private void wireActions() {
-        btn1.setOnAction(e -> controller.onPlayerAction("coup"));
-        btn2.setOnAction(e -> controller.onPlayerAction("cri"));
-        btn3.setOnAction(e -> controller.onPlayerAction("saut"));
-        btn4.setOnAction(e -> controller.onPlayerAction("danse"));
+    /**
+     * Charge les actions (moves) du joueur et met à jour les boutons.
+     */
+    public void setPlayerActions(List<Action> moves) {
+        // on suppose jusqu'à 4 moves ; si moins, on désactive certains boutons
+        for (int i = 0; i < actionButtons.size(); i++) {
+            Button b = actionButtons.get(i);
+            if (i < moves.size()) {
+                Action act = moves.get(i);
+                // label via controller (plus lisible)
+                b.setText(controller.actionLabel(act));
+                b.setDisable(false);
+                int finalI = i;
+                b.setOnAction(e -> controller.onPlayerAction(moves.get(finalI)));
+            } else {
+                b.setText("-");
+                b.setDisable(true);
+                b.setOnAction(null);
+            }
+        }
     }
 
     public void bindNames(String playerName, String iaName) {
@@ -123,8 +147,17 @@ public class BattleView extends BorderPane {
             String pathPlayer = "/images/" + playerName.toLowerCase() + ".jpg";
             String pathIa = "/images/" + iaName.toLowerCase() + ".jpg";
 
-            imgPlayer.setImage(new Image(getClass().getResourceAsStream(pathPlayer)));
-            imgIa.setImage(new Image(getClass().getResourceAsStream(pathIa)));
+            if (getClass().getResourceAsStream(pathPlayer) != null) {
+                imgPlayer.setImage(new Image(getClass().getResourceAsStream(pathPlayer)));
+            } else {
+                System.err.println("Image joueur introuvable: " + pathPlayer);
+            }
+
+            if (getClass().getResourceAsStream(pathIa) != null) {
+                imgIa.setImage(new Image(getClass().getResourceAsStream(pathIa)));
+            } else {
+                System.err.println("Image IA introuvable: " + pathIa);
+            }
         } catch (Exception e) {
             System.err.println("Erreur lors du chargement des images : " + e.getMessage());
         }
@@ -139,11 +172,11 @@ public class BattleView extends BorderPane {
             switch (env) {
                 case GRASS -> {
                     fileName = "grass.png";
-                    offsetY = 22;   // ça marchait déjà bien
+                    offsetY = 22;
                 }
                 case SAND -> {
                     fileName = "sand.png";
-                    offsetY = 12;   // un peu plus haut pour toucher les pattes
+                    offsetY = 12;
                 }
                 case ROCK -> {
                     fileName = "rock.png";
@@ -164,14 +197,15 @@ public class BattleView extends BorderPane {
             }
 
             String path = "/images/" + fileName;
-            Image platformImage = new Image(getClass().getResourceAsStream(path));
-
-            imgPlayerPlatform.setImage(platformImage);
-            imgIaPlatform.setImage(platformImage);
-
-            // on applique l’offset pour les deux plateformes
-            imgPlayerPlatform.setTranslateY(offsetY);
-            imgIaPlatform.setTranslateY(offsetY);
+            if (getClass().getResourceAsStream(path) != null) {
+                Image platformImage = new Image(getClass().getResourceAsStream(path));
+                imgPlayerPlatform.setImage(platformImage);
+                imgIaPlatform.setImage(platformImage);
+                imgPlayerPlatform.setTranslateY(offsetY);
+                imgIaPlatform.setTranslateY(offsetY);
+            } else {
+                System.err.println("Plateforme introuvable: " + path);
+            }
 
         } catch (Exception e) {
             System.err.println("Erreur lors du chargement de la plateforme : " + e.getMessage());
@@ -192,9 +226,6 @@ public class BattleView extends BorderPane {
     }
 
     public void disableActions() {
-        btn1.setDisable(true);
-        btn2.setDisable(true);
-        btn3.setDisable(true);
-        btn4.setDisable(true);
+        for (Button b : actionButtons) b.setDisable(true);
     }
 }

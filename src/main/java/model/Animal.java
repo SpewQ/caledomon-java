@@ -1,5 +1,12 @@
 package model;
 
+import java.util.List;
+
+import model.actions.Action;
+
+/**
+ * model/Animal.java
+ */
 public abstract class Animal {
     protected String nom;
     protected int pv;
@@ -8,6 +15,9 @@ public abstract class Animal {
     protected int vitesse;
     protected Type type;
     protected Etat etat;
+
+    // Nouvelle liste d'actions
+    public List<Action> actions;
 
     public Animal(String nom, int pv, int attaque, int defense, int vitesse, Type type) {
         this.nom = nom;
@@ -61,4 +71,15 @@ public abstract class Animal {
     public void setEtat(Etat e) { this.etat = e; }
 
     public int getMaxPv() { return 100; }
+
+    // --- Actions management ---
+    public List<Action> getActions() {
+        return actions;
+    }
+
+    public void setActions(List<Action> actions) {
+        this.actions = actions;
+    }
+    
+    public abstract Animal copy();
 }
