@@ -10,6 +10,7 @@ import model.actions.Action;
 public abstract class Animal {
     protected String nom;
     protected int pv;
+    protected int maxPv;
     protected int attaque;
     protected int defense;
     protected int vitesse;
@@ -22,6 +23,7 @@ public abstract class Animal {
     public Animal(String nom, int pv, int attaque, int defense, int vitesse, Type type) {
         this.nom = nom;
         this.pv = pv;
+        this.maxPv = pv;
         this.attaque = attaque;
         this.defense = defense;
         this.vitesse = vitesse;
@@ -70,7 +72,7 @@ public abstract class Animal {
     public Etat getEtat() { return etat; }
     public void setEtat(Etat e) { this.etat = e; }
 
-    public int getMaxPv() { return 100; }
+    public int getMaxPv() { return maxPv; }
 
     // --- Actions management ---
     public List<Action> getActions() {

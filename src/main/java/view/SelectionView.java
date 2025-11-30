@@ -1,5 +1,6 @@
 package view;
 
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -30,6 +31,14 @@ public class SelectionView extends VBox {
         btnGecko.setOnAction(e -> notifySelection("Gecko"));
         btnTricot.setOnAction(e -> notifySelection("Tricot Raye"));
 
+        title.styleProperty().bind(
+            Bindings.concat("-fx-font-size: ", heightProperty().multiply(0.06).asString(), ";")
+        );
+
+        btnCagou.prefWidthProperty().bind(widthProperty().multiply(0.25));
+        btnGecko.prefWidthProperty().bind(widthProperty().multiply(0.25));
+        btnTricot.prefWidthProperty().bind(widthProperty().multiply(0.25));
+
         HBox box = new HBox(20, btnCagou, btnGecko, btnTricot);
         box.setAlignment(Pos.CENTER);
 
@@ -38,18 +47,62 @@ public class SelectionView extends VBox {
 
     private Button createAnimalButton(String name) {
         Button b = new Button(name);
+    
+        // --- Image du Calédomon ---
         try {
-            Image img = new Image(getClass().getResourceAsStream("/images/" + name.toLowerCase() + ".jpg"));
+            Image img = new Image(getClass().getResourceAsStream("/images/" + name.toLowerCase() + ".png"));
             ImageView iv = new ImageView(img);
             iv.setFitHeight(80);
             iv.setPreserveRatio(true);
             b.setGraphic(iv);
+            b.setContentDisplay(javafx.scene.control.ContentDisplay.TOP); // image au-dessus du texte
         } catch (Exception ignored) {
             // si image manquante on garde juste le texte
         }
-        b.setStyle("-fx-font-size: 14px; -fx-padding: 10;");
+
+        // --- Style Pokémon / Nouvelle-Calédonie ---
+        String baseStyle = """
+            -fx-background-color: linear-gradient(#00cfff, #007f5f);
+            -fx-text-fill: white;
+            -fx-font-size: 16px;
+            -fx-font-weight: bold;
+            -fx-background-radius: 15;
+            -fx-border-radius: 15;
+            -fx-border-color: #ffd700;
+            -fx-border-width: 2;
+            -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4,0,0,2);
+            -fx-padding: 10 20 10 20;
+        """;
+        b.setStyle(baseStyle);
+
+        // --- Hover effect ---
+        b.setOnMouseEntered(e -> b.setStyle("""
+            -fx-background-color: linear-gradient(#00e5ff, #00a370);
+            -fx-text-fill: white;
+            -fx-font-size: 16px;
+            -fx-font-weight: bold;
+            -fx-background-radius: 15;
+            -fx-border-radius: 15;
+            -fx-border-color: #ffd700;
+            -fx-border-width: 2;
+            -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 6,0,0,3);
+            -fx-padding: 10 20 10 20;
+        """));
+        b.setOnMouseExited(e -> b.setStyle(baseStyle));
+
+        // --- Click animation ---
+        b.setOnMousePressed(e -> {
+            b.setScaleX(0.95);
+            b.setScaleY(0.95);
+        });
+        b.setOnMouseReleased(e -> {
+            b.setScaleX(1.0);
+            b.setScaleY(1.0);
+        });
+
         return b;
     }
+
 
     public void setOnSelectionConfirmed(java.util.function.Consumer<String> callback) {
         this.onSelected = callback;

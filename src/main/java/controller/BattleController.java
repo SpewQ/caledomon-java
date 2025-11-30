@@ -1,12 +1,15 @@
 package controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
 
+import javafx.animation.PauseTransition;
 import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.util.Duration;
 import model.Battle;
 import model.EnvironmentType;
 import model.actions.Action;
@@ -27,11 +30,14 @@ public class BattleController {
 
     // callback lorsque le combat est terminé. true = joueur gagne
     private Consumer<Boolean> onBattleEnded;
+    private boolean battleTermineeAlready = false;
 
     // musique et effets (optionnel)
     private MediaPlayer bgmPlayer;
     private AudioClip sfxVictory;
     private AudioClip sfxDefeat;
+    private AudioClip sfxButton;
+
 
     public BattleController(Battle battle) {
         this.battle = battle;
@@ -52,6 +58,10 @@ public class BattleController {
 
             var dUrl = getClass().getResource("/sounds/defeat.wav");
             if (dUrl != null) sfxDefeat = new AudioClip(dUrl.toExternalForm());
+
+            var actionUrl = getClass().getResource("/sounds/button.mp3");
+            if (actionUrl != null) sfxButton = new AudioClip(actionUrl.toExternalForm());
+
         } catch (Exception e) {
             System.err.println("Impossible de charger les sons : " + e.getMessage());
         }
@@ -104,57 +114,73 @@ public class BattleController {
         }
     }
 
-    /**
-     * Appelé par la vue lorsqu'un bouton d'action est pressé.
-     * Le paramètre est une Action concrète (ex : CoupDeBec).
-     */
     public void onPlayerAction(Action action) {
-        if (battle.combatTermine()) {
+        if (battle.combatTermine() || battleTermineeAlready) {
             view.addLog("Le combat est terminé.");
             view.disableActions();
             return;
         }
 
-        // action IA choisie parmi les moves de l'IA si disponible, sinon random fallback
+        if (sfxButton != null) sfxButton.play();
+
         Action iaAction = randomIaAction();
+        view.disableActions(); 
 
-        // Exécution de l'action du joueur
-        action.executer(battle.getJoueur1(), battle.getJoueur2());
+        List<Runnable> seq = new ArrayList<>();
 
-        // si l'IA est encore en vie, elle répond
-        if (!battle.combatTermine()) {
-            iaAction.executer(battle.getJoueur2(), battle.getJoueur1());
-        }
+        // 1) Log joueur
+        seq.add(() -> view.addLog("Le joueur utilise " + actionLabel(action) + " !"));
 
-        // refresh UI
-        view.refreshHp(
-            battle.getJoueur1().getPv(), battle.getJoueur2().getPv(),
-            battle.getJoueur1().getMaxPv(), battle.getJoueur2().getMaxPv()
-        );
+        // 2) Action joueur
+        seq.add(() -> {
+            action.executer(battle.getJoueur1(), battle.getJoueur2());
+            view.refreshHp(
+                battle.getJoueur1().getPv(), battle.getJoueur2().getPv(),
+                battle.getJoueur1().getMaxPv(), battle.getJoueur2().getMaxPv()
+            );
+            view.animateHitOnEnemy();
+        });
 
-        view.addLog("Joueur: " + actionLabel(action) + " | IA: " + actionLabel(iaAction));
-        view.addLog("PV Joueur: " + battle.getJoueur1().getPv() +
-                    " | PV IA: " + battle.getJoueur2().getPv());
+        // 3) Vérification si l'ennemi meurt
+        seq.add(() -> checkEndBattle(true));
 
-        if (battle.combatTermine()) {
-            boolean playerWon = battle.getJoueur1().estVivant();
-            String result = playerWon ? "Victoire du joueur !" : "Défaite...";
-            view.addLog(result);
-            view.disableActions();
-
-            // stop BGM
-            if (bgmPlayer != null) {
-                bgmPlayer.stop();
+        // 4) Log IA
+        seq.add(() -> {
+            if (!battle.combatTermine()) {
+                view.addLog("L'IA utilise " + actionLabel(iaAction) + " !");
             }
+        });
 
-            // play sfx
-            if (playerWon && sfxVictory != null) sfxVictory.play();
-            if (!playerWon && sfxDefeat != null) sfxDefeat.play();
-
-            // small delay optional could be added before calling callback
-            if (onBattleEnded != null) {
-                onBattleEnded.accept(playerWon);
+        // 5) Action IA
+        seq.add(() -> {
+            if (!battle.combatTermine()) {
+                iaAction.executer(battle.getJoueur2(), battle.getJoueur1());
+                view.refreshHp(
+                    battle.getJoueur1().getPv(), battle.getJoueur2().getPv(),
+                    battle.getJoueur1().getMaxPv(), battle.getJoueur2().getMaxPv()
+                );
+                view.animateHitOnPlayer();
             }
+        });
+
+        // 6) Vérification si le joueur meurt
+        seq.add(() -> checkEndBattle(false));
+
+        // 7) Réactivation des actions si le combat continue
+        seq.add(() -> {
+            if (!battle.combatTermine()) {
+                view.enableActions();
+            }
+        });
+
+        playSequence(seq);
+    }
+
+    // Méthode de vérification sécurisée
+    private void checkEndBattle(boolean joueurATueEnnemi) {
+        if (!battleTermineeAlready && battle.combatTermine()) {
+            battleTermineeAlready = true;
+            endBattle(joueurATueEnnemi);
         }
     }
 
@@ -176,6 +202,29 @@ public class BattleController {
         }
     }
 
+    private void endBattle(boolean playerWon) {
+
+        view.disableActions();
+
+        // stop musique
+        if (bgmPlayer != null) bgmPlayer.stop();
+
+        // sons
+        if (playerWon && sfxVictory != null) sfxVictory.play();
+        if (!playerWon && sfxDefeat != null) sfxDefeat.play();
+
+        String result = playerWon ? "Victoire du joueur !" : "Défaite...";
+        view.addLog(result);
+
+        // callback de fin
+        if (onBattleEnded != null) {
+            // léger délai pour laisser l’animation se finir
+            PauseTransition delay = new PauseTransition(Duration.seconds(1.0));
+            delay.setOnFinished(e -> onBattleEnded.accept(playerWon));
+            delay.play();
+        }
+    }
+
     /**
      * Fournit un label lisible pour une action (utilisé aussi par la view).
      * Rendue publique pour que BattleView puisse l'utiliser.
@@ -193,4 +242,20 @@ public class BattleController {
         String cn = a.getClass().getSimpleName();
         return cn.replaceAll("([A-Z])", " $1").trim();
     }
+    
+    private void playSequence(List<Runnable> actions) {
+        playSequenceRecursive(actions, 0);
+    }
+
+    private void playSequenceRecursive(List<Runnable> actions, int index) {
+        if (index >= actions.size()) return;
+
+        Runnable current = actions.get(index);
+        current.run();
+
+        PauseTransition pause = new PauseTransition(Duration.seconds(0.6)); // délai style Pokémon
+        pause.setOnFinished(e -> playSequenceRecursive(actions, index + 1));
+        pause.play();
+    }
+
 }

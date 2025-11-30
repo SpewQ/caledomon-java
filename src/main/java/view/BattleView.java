@@ -4,6 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import controller.BattleController;
+import javafx.animation.FadeTransition;
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+import javafx.animation.TranslateTransition;
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -16,6 +23,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.AudioClip;
+import javafx.util.Duration;
 import model.EnvironmentType;
 import model.actions.Action;
 
@@ -43,10 +52,23 @@ public class BattleView extends BorderPane {
 
     private final TextArea taLog = new TextArea();
 
+    private AudioClip sfxHit;
+
     public BattleView(BattleController controller) {
         this.controller = controller;
+        loadAudio();
         buildUI();
         // wireActions is not used for static buttons anymore
+    }
+
+    private void loadAudio() {
+        try {
+            var hitUrl = getClass().getResource("/sounds/hit.mp3");
+            if (hitUrl != null) sfxHit = new AudioClip(hitUrl.toExternalForm());
+
+        } catch (Exception e) {
+            System.err.println("Impossible de charger les sons : " + e.getMessage());
+        }
     }
 
     private void buildUI() {
@@ -62,9 +84,9 @@ public class BattleView extends BorderPane {
         imgPlayerPlatform.setFitHeight(55);
         imgPlayerPlatform.setPreserveRatio(false);
 
-        imgIaPlatform.setFitWidth(130);
-        imgIaPlatform.setFitHeight(50);
-        imgIaPlatform.setPreserveRatio(true);
+        imgIaPlatform.setFitWidth(170);
+        imgIaPlatform.setFitHeight(55);
+        imgIaPlatform.setPreserveRatio(false);
 
         // --- Stack sol + animal (plateforme devant) ---
         StackPane playerSpriteStack = new StackPane();
@@ -79,7 +101,7 @@ public class BattleView extends BorderPane {
 
         // Position de base des sprites
         imgPlayer.setTranslateY(0);
-        imgIa.setTranslateY(-10);
+        imgIa.setTranslateY(0);
 
         // --- Joueur ---
         VBox playerBox = new VBox(5, playerSpriteStack, lblPlayerName, pbPlayerHp, lblPlayerHp);
@@ -110,9 +132,40 @@ public class BattleView extends BorderPane {
 
         // --- Zone de log ---
         taLog.setEditable(false);
-        taLog.setPrefHeight(120);
+        taLog.prefHeightProperty().bind(widthProperty().multiply(0.20));
         taLog.setWrapText(true);
         setTop(taLog);
+
+        // --- Images joueur/IA responsives ---
+        imgPlayer.fitHeightProperty().bind(heightProperty().multiply(0.28));
+        imgIa.fitHeightProperty().bind(heightProperty().multiply(0.28));
+
+        imgPlayerPlatform.fitWidthProperty().bind(widthProperty().multiply(0.18));
+        imgPlayerPlatform.fitHeightProperty().bind(heightProperty().multiply(0.08));
+
+        imgIaPlatform.fitWidthProperty().bind(widthProperty().multiply(0.18));
+        imgIaPlatform.fitHeightProperty().bind(heightProperty().multiply(0.08));
+
+        // --- PV bars responsives ---
+        pbPlayerHp.prefWidthProperty().bind(widthProperty().multiply(0.20));
+        pbPlayerHp.prefHeightProperty().bind(widthProperty().multiply(0.02));
+        lblPlayerHp.styleProperty().bind(
+            Bindings.concat("-fx-font-size: ", heightProperty().multiply(0.04).asString(), ";")
+        );
+
+        pbIaHp.prefWidthProperty().bind(widthProperty().multiply(0.20));
+        pbIaHp.prefHeightProperty().bind(widthProperty().multiply(0.02));
+        lblIaHp.styleProperty().bind(
+            Bindings.concat("-fx-font-size: ", heightProperty().multiply(0.04).asString(), ";")
+        );
+
+        // --- Boutons responsifs ---
+        for (Button b : actionButtons) {
+            b.prefWidthProperty().bind(widthProperty().multiply(0.20));
+            b.prefHeightProperty().bind(heightProperty().multiply(0.08));
+        }
+        setBottom(actionBox);
+        styleActionButtons();
     }
 
     /**
@@ -134,18 +187,64 @@ public class BattleView extends BorderPane {
                 b.setDisable(true);
                 b.setOnAction(null);
             }
+            b.setOnMousePressed(e -> b.setScaleX(0.95));
+            b.setOnMousePressed(e -> b.setScaleY(0.95));
+            b.setOnMouseReleased(e -> {
+                b.setScaleX(1.0);
+                b.setScaleY(1.0);
+            });
         }
     }
 
+    private void styleActionButtons() {
+        for (Button b : actionButtons) {
+            b.setStyle("""
+                -fx-background-color: linear-gradient(#00cfff, #007f5f);
+                -fx-text-fill: white;
+                -fx-font-size: 16px;
+                -fx-font-weight: bold;
+                -fx-background-radius: 15;
+                -fx-border-radius: 15;
+                -fx-border-color: #ffd700;
+                -fx-border-width: 2;
+                -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4,0,0,2);
+            """);
+
+            // Hover effect
+            b.setOnMouseEntered(e -> b.setStyle("""
+                -fx-background-color: linear-gradient(#00e5ff, #00a370);
+                -fx-text-fill: white;
+                -fx-font-size: 16px;
+                -fx-font-weight: bold;
+                -fx-background-radius: 15;
+                -fx-border-radius: 15;
+                -fx-border-color: #ffd700;
+                -fx-border-width: 2;
+                -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 6,0,0,3);
+            """));
+            b.setOnMouseExited(e -> styleActionButtons()); // revenir au style normal
+        }
+    }
+
+
     public void bindNames(String playerName, String iaName) {
+
         lblPlayerName.setText(playerName);
+        lblPlayerName.styleProperty().bind(
+            Bindings.concat("-fx-font-size: ", heightProperty().multiply(0.04).asString(), ";")
+        );
+
         lblIaName.setText(iaName);
+        lblIaName.styleProperty().bind(
+            Bindings.concat("-fx-font-size: ", heightProperty().multiply(0.04).asString(), ";")
+        );
+
     }
 
     public void setImages(String playerName, String iaName) {
         try {
-            String pathPlayer = "/images/" + playerName.toLowerCase() + ".jpg";
-            String pathIa = "/images/" + iaName.toLowerCase() + ".jpg";
+            String pathPlayer = "/images/" + playerName.toLowerCase() + ".png";
+            String pathIa = "/images/" + iaName.toLowerCase() + ".png";
 
             if (getClass().getResourceAsStream(pathPlayer) != null) {
                 imgPlayer.setImage(new Image(getClass().getResourceAsStream(pathPlayer)));
@@ -212,13 +311,23 @@ public class BattleView extends BorderPane {
         }
     }
 
+    // ---------------------------------------------------------
+    // PV bar animation
+    // ---------------------------------------------------------
     public void refreshHp(int playerPv, int iaPv, int playerMax, int iaMax) {
-        double pRatio = Math.max(0, Math.min(1.0, (double) playerPv / Math.max(1, playerMax)));
-        double iRatio = Math.max(0, Math.min(1.0, (double) iaPv / Math.max(1, iaMax)));
-        pbPlayerHp.setProgress(pRatio);
-        pbIaHp.setProgress(iRatio);
-        lblPlayerHp.setText(playerPv + " / " + playerMax);
-        lblIaHp.setText(iaPv + " / " + iaMax);
+            lblPlayerHp.setText(playerPv + " / " + playerMax);
+            lblIaHp.setText(iaPv + " / " + iaMax);
+            animateBar(pbPlayerHp, (double) playerPv / playerMax);
+            animateBar(pbIaHp, (double) iaPv / iaMax);
+        }
+
+
+        private void animateBar(ProgressBar bar, double target) {
+            Timeline tl = new Timeline(
+                new KeyFrame(Duration.seconds(0.4),
+                new KeyValue(bar.progressProperty(), target, Interpolator.EASE_BOTH))
+            );
+            tl.play();
     }
 
     public void addLog(String message) {
@@ -227,5 +336,60 @@ public class BattleView extends BorderPane {
 
     public void disableActions() {
         for (Button b : actionButtons) b.setDisable(true);
+    }
+
+    public void enableActions() {
+        for (Button b : actionButtons) b.setDisable(false);
+    }
+
+    // ---------------------------------------------------------
+    // Animations Pokémon
+    // ---------------------------------------------------------
+
+
+    /** Sprite du joueur avance pour attaquer */
+    public void animateHitOnEnemy() {
+        TranslateTransition t = new TranslateTransition(Duration.seconds(0.15), imgPlayer);
+        t.setByX(40);
+        t.setAutoReverse(true);
+        t.setCycleCount(2);
+        t.play();
+        if (sfxHit != null) sfxHit.play();
+
+        flashSprite(imgIa);
+        shakeScreen();
+    }
+
+
+    /** Sprite de l'ennemi avance pour attaquer */
+    public void animateHitOnPlayer() {
+        TranslateTransition t = new TranslateTransition(Duration.seconds(0.15), imgIa);
+        t.setByX(-40);
+        t.setAutoReverse(true);
+        t.setCycleCount(2);
+        t.play();
+        if (sfxHit != null) sfxHit.play();
+
+        flashSprite(imgPlayer);
+        shakeScreen();
+    }
+
+    /** Clignotement lors des dégâts */
+    private void flashSprite(ImageView iv) {
+        FadeTransition f = new FadeTransition(Duration.seconds(0.1), iv);
+        f.setFromValue(1);
+        f.setToValue(0.2);
+        f.setAutoReverse(true);
+        f.setCycleCount(4);
+        f.play();
+    }
+
+    /** Tremblement de l'écran */
+    private void shakeScreen() {
+        TranslateTransition shake = new TranslateTransition(Duration.seconds(0.05), this);
+        shake.setByX(6);
+        shake.setAutoReverse(true);
+        shake.setCycleCount(6);
+        shake.play();
     }
 }

@@ -4,6 +4,7 @@ import java.util.Random;
 
 import javafx.animation.FadeTransition;
 import javafx.scene.Scene;
+import javafx.scene.media.AudioClip;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import model.Animal;
@@ -17,16 +18,29 @@ public class SelectionController {
 
     private final Stage stage;
     private final SelectionView view;
+    private AudioClip sfxButton;
 
     public SelectionController(Stage stage, SelectionView view) {
         this.stage = stage;
         this.view = view;
+        loadAudio();
 
         // lorsque la vue signale une sélection : create battle
         this.view.setOnSelectionConfirmed(this::onSelect);
     }
 
+    private void loadAudio() {
+        try {
+            var actionUrl = getClass().getResource("/sounds/button.mp3");
+            if (actionUrl != null) sfxButton = new AudioClip(actionUrl.toExternalForm());
+
+        } catch (Exception e) {
+            System.err.println("Impossible de charger les sons : " + e.getMessage());
+        }
+    }
+
     private void onSelect(String chosenName) {
+        if (sfxButton != null) sfxButton.play();
         Animal player = AnimalFactory.createAnimal(chosenName);
 
         // IA aléatoire
@@ -45,20 +59,6 @@ public class SelectionController {
             String title = playerWon ? "Victoire !" : "Défaite...";
             String detail = playerWon ? "Bravo, vous avez vaincu votre adversaire." : "Votre Calédomon est K.O.";
             ResultView resultView = new ResultView(title, detail);
-
-            // actions boutons
-            resultView.setOnReplay(() -> {
-                // replay : relancer un combat entre les mêmes créatures
-                // pour l'effet, on crée un nouveau Battle avec mêmes animals
-                Battle newBattle = new Battle(battle.getJoueur1().copy(), battle.getJoueur2().copy());
-                BattleController bc = new BattleController(newBattle);
-                BattleView bv = new BattleView(bc);
-                bc.setView(bv);
-                bc.setOnBattleEnded(this::showResultSceneFromBoolean);
-                // transition
-                switchSceneWithFade(bv);
-                bc.startBattle();
-            });
 
             resultView.setOnReturnToMenu(() -> {
                 // revenir au menu de sélection
@@ -93,11 +93,4 @@ public class SelectionController {
         ft.play();
     }
 
-    private void showResultSceneFromBoolean(Boolean playerWon) {
-        onSelectResult(playerWon);
-    }
-
-    private void onSelectResult(Boolean playerWon) {
-        
-    }
 }
