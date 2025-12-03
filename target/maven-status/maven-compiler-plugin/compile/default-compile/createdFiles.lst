@@ -6,7 +6,6 @@ main\MainApp.class
 model\Etat.class
 model\actions\cagou\CoupDeBec.class
 model\Battle.class
-model\actions\Buff.class
 view\BattleView$2.class
 model\EnvironmentType.class
 controller\BattleController.class
@@ -24,9 +23,7 @@ model\animals\TricotRaye.class
 view\BattleView$1.class
 model\actions\tricotraye\ContractionSerpentine.class
 model\actions\Action.class
-model\actions\Attack.class
 model\actions\cagou\CriAlerte.class
-model\AnimationType.class
 view\ResultView.class
 model\actions\tricotraye\SouffleDraconique.class
 model\factories\AnimalFactory.class

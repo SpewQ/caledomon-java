@@ -37,7 +37,8 @@ public class BattleController {
     private AudioClip sfxVictory;
     private AudioClip sfxDefeat;
     private AudioClip sfxButton;
-
+    private AudioClip sfxBuff;
+    private AudioClip sfxDebuff;
 
     public BattleController(Battle battle) {
         this.battle = battle;
@@ -61,6 +62,13 @@ public class BattleController {
 
             var actionUrl = getClass().getResource("/sounds/button.mp3");
             if (actionUrl != null) sfxButton = new AudioClip(actionUrl.toExternalForm());
+
+            var buffUrl = getClass().getResource("/sounds/buff.mp3");
+            if (buffUrl != null) sfxBuff = new AudioClip(buffUrl.toExternalForm());
+
+            var debuffUrl = getClass().getResource("/sounds/debuff.mp3");
+            if (debuffUrl != null) sfxDebuff = new AudioClip(debuffUrl.toExternalForm());
+
 
         } catch (Exception e) {
             System.err.println("Impossible de charger les sons : " + e.getMessage());
@@ -140,8 +148,18 @@ public class BattleController {
         seq.add(() -> {
             boolean canAttack = battle.canAct(battle.getJoueur1());
 
-            view.animateHitOnEnemyIfAllowed(canAttack);
-
+            if (action.isBuff()) {
+                view.animateBuffOnPlayer();
+                if (sfxBuff != null) sfxBuff.play();
+            }
+            else if (action.isDebuff()) {
+                view.animateDebuffOnEnemy();
+                if (sfxDebuff != null) sfxDebuff.play();
+            }
+            else {
+                view.animateHitOnEnemyIfAllowed(canAttack);
+            }
+            
             if (canAttack) {
                 action.executer(battle.getJoueur1(), battle.getJoueur2());
                 view.refreshHp(
@@ -168,7 +186,17 @@ public class BattleController {
         seq.add(() -> {
             boolean canIaAttack = battle.canAct(battle.getJoueur2());
 
-            view.animateHitOnPlayerIfAllowed(canIaAttack);
+            if (iaAction.isBuff()) {
+                view.animateBuffOnEnemy();
+                if (sfxBuff != null) sfxBuff.play();
+            }
+            else if (iaAction.isDebuff()) {
+                view.animateDebuffOnPlayer();
+                if (sfxDebuff != null) sfxDebuff.play();
+            }
+            else {
+                view.animateHitOnPlayerIfAllowed(canIaAttack);
+            }
 
             if (!battle.combatTermine() && canIaAttack) {
                 iaAction.executer(battle.getJoueur2(), battle.getJoueur1());

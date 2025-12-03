@@ -3,6 +3,7 @@ package main;
 import controller.SelectionController;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import view.SelectionView;
 
@@ -11,10 +12,13 @@ public class MainApp extends Application {
     @Override
     public void start(Stage stage) {
         SelectionView selectionView = new SelectionView();
+        Image icon = new Image(getClass().getResourceAsStream("/images/icon.png"));
+
         new SelectionController(stage, selectionView);
 
         Scene selectionScene = new Scene(selectionView, 800, 500);
         stage.setTitle("Sélection du Calédomon");
+        stage.getIcons().add(icon);
         stage.setScene(selectionScene);
         stage.sizeToScene();
         stage.show();

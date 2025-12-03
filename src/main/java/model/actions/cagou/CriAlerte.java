@@ -1,12 +1,12 @@
 package model.actions.cagou;
 
 import model.Animal;
-import model.actions.Action;
+import model.actions.DebuffAction;
 
-public class CriAlerte extends Action {
+public class CriAlerte extends DebuffAction {
 
     public CriAlerte() {
-        super(0, 100); // pas de damage, juste effet de stage
+        super("Cri d'Alerte"); // pas de damage, juste effet de stage
     }
 
     @Override

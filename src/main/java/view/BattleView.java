@@ -13,6 +13,8 @@ import javafx.animation.FadeTransition;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
+import javafx.animation.ParallelTransition;
+import javafx.animation.ScaleTransition;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
@@ -120,12 +122,12 @@ public class BattleView extends BorderPane {
 
         // --- Stack sol + animal (plateforme devant) ---
         StackPane playerSpriteStack = new StackPane();
-        playerSpriteStack.getChildren().addAll(imgPlayer, imgPlayerPlatform);
+        playerSpriteStack.getChildren().addAll(imgPlayerPlatform, imgPlayer);
         StackPane.setAlignment(imgPlayer, Pos.BOTTOM_CENTER);
         StackPane.setAlignment(imgPlayerPlatform, Pos.BOTTOM_CENTER);
 
         StackPane iaSpriteStack = new StackPane();
-        iaSpriteStack.getChildren().addAll(imgIa, imgIaPlatform);
+        iaSpriteStack.getChildren().addAll(imgIaPlatform, imgIa);
         StackPane.setAlignment(imgIa, Pos.BOTTOM_CENTER);
         StackPane.setAlignment(imgIaPlatform, Pos.BOTTOM_CENTER);
 
@@ -388,6 +390,23 @@ public class BattleView extends BorderPane {
     public void animatePoisonOnEnemy() {
         animatePoisonEffect(imgIa);
     }
+
+    public void animateBuffOnPlayer() { 
+        animateBuff(imgPlayer); 
+    }
+
+    public void animateDebuffOnEnemy() { 
+        animateDebuff(imgIa); 
+    }
+
+    public void animateBuffOnEnemy() { 
+        animateBuff(imgIa); 
+    }
+
+    public void animateDebuffOnPlayer() { 
+        animateDebuff(imgPlayer); 
+    }
+
     public void animateHitOnEnemyIfAllowed(boolean canAttack) {
         animateHitOnEnemy(canAttack);
     }
@@ -491,4 +510,62 @@ public class BattleView extends BorderPane {
         shake.setCycleCount(6);
         shake.play();
     }
+
+    /** Animation : buff appliqué sur soi (aura claire + montée) */
+    public void animateBuff(ImageView sprite) {
+
+        // légère montée
+        TranslateTransition lift = new TranslateTransition(Duration.seconds(0.25), sprite);
+        lift.setByY(-20);
+        lift.setAutoReverse(true);
+        lift.setCycleCount(2);
+
+        // glow lumineux
+        ColorAdjust color = new ColorAdjust();
+        sprite.setEffect(color);
+
+        Timeline glow = new Timeline(
+            new KeyFrame(Duration.ZERO,
+                new KeyValue(color.brightnessProperty(), 0)
+            ),
+            new KeyFrame(Duration.seconds(0.25),
+                new KeyValue(color.brightnessProperty(), 0.8)
+            ),
+            new KeyFrame(Duration.seconds(0.50),
+                new KeyValue(color.brightnessProperty(), 0)
+            )
+        );
+
+        // jouer ensemble
+        ParallelTransition pt = new ParallelTransition(lift, glow);
+        pt.setOnFinished(e -> sprite.setEffect(null));
+        pt.play();
+    }
+
+    /** Animation : debuff appliqué à l'ennemi (assombrissement + contraction) */
+    public void animateDebuff(ImageView sprite) {
+
+        // assombrissement
+        ColorAdjust color = new ColorAdjust();
+        color.setBrightness(-0.7);
+        sprite.setEffect(color);
+
+        // contraction
+        ScaleTransition shrink = new ScaleTransition(Duration.seconds(0.25), sprite);
+        shrink.setToX(0.85);
+        shrink.setToY(0.85);
+        shrink.setAutoReverse(true);
+        shrink.setCycleCount(2);
+
+        // petit tremblement horizontal
+        TranslateTransition shake = new TranslateTransition(Duration.seconds(0.05), sprite);
+        shake.setByX(10);
+        shake.setCycleCount(6);
+        shake.setAutoReverse(true);
+
+        ParallelTransition pt = new ParallelTransition(shrink, shake);
+        pt.setOnFinished(e -> sprite.setEffect(null));
+        pt.play();
+    }
+
 }

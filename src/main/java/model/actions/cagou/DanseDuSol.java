@@ -1,12 +1,12 @@
 package model.actions.cagou;
 
 import model.Animal;
-import model.actions.Action;
+import model.actions.BuffAction;
 
-public class DanseDuSol extends Action {
+public class DanseDuSol extends BuffAction {
     
     public DanseDuSol() { 
-        super(0, 100);
+        super("Danse du Sol");
     }
 
     @Override

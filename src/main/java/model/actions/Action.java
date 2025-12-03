@@ -63,4 +63,8 @@ public abstract class Action {
             System.out.println("Ce n'est pas très efficace...");
         }
     }
+
+    public boolean isBuff() { return false; }
+    public boolean isDebuff() { return false; }
+
 }
