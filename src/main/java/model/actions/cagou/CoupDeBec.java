@@ -6,8 +6,7 @@ import model.actions.Action;
 public class CoupDeBec implements Action {
     @Override
     public void executer(Animal attaquant, Animal cible) {
-        int degats = Math.max(0, attaquant.getAttaque() - cible.getDefense());
-        cible.setPv(cible.getPv() - degats);
-        System.out.println(attaquant.getNom() + " utilise Coup de Bec ! (" + degats + " dégâts)");
+        // pas de bonus, juste l'attaque classique
+        applyStandardDamage(attaquant, cible, 0, "Coup de Bec");
     }
 }

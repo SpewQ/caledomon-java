@@ -17,7 +17,7 @@ public abstract class Animal {
     protected Type type;
     protected Etat etat;
 
-    // Nouvelle liste d'actions
+    // Liste d'actions de l'animal
     public List<Action> actions;
 
     public Animal(String nom, int pv, int attaque, int defense, int vitesse, Type type) {
@@ -33,14 +33,36 @@ public abstract class Animal {
 
     public abstract void actionSpeciale(Animal cible);
 
+    /**
+     * Attaque "de base" générique.
+     */
     public void attaquer(Animal cible) {
+        // dégâts de base
         int base = Math.max(0, this.attaque - cible.defense);
-        int degats = base;
+
+        // multiplicateur selon les types
+        double mult = this.type.effectivenessAgainst(cible.getType());
+
+        int degats = (int) Math.round(base * mult);
+
+        // cible en défense
         if (cible.etat == Etat.DEFENSE) {
             degats = Math.max(0, degats - 5);
         }
+
+        // on évite les attaques qui font 0 alors que ça touche
+        degats = Math.max(1, degats);
+
         cible.setPv(cible.getPv() - degats);
+
+        // Messages pour l'UI (console pour l’instant)
         System.out.println(nom + " attaque " + cible.nom + " et inflige " + degats + " dégâts !");
+
+        if (mult > 1.0) {
+            System.out.println("C'est super efficace !");
+        } else if (mult < 1.0) {
+            System.out.println("Ce n'est pas très efficace...");
+        }
     }
 
     public void defendre() {
@@ -82,6 +104,6 @@ public abstract class Animal {
     public void setActions(List<Action> actions) {
         this.actions = actions;
     }
-    
+
     public abstract Animal copy();
 }

@@ -8,14 +8,12 @@ public class SouffleDraconique implements Action {
 
     @Override
     public void executer(Animal attaquant, Animal cible) {
-        System.out.println(attaquant.getNom() + " lance Souffle Draconique !");
-        
-        int degats = Math.max(0, attaquant.getAttaque() - cible.getDefense() + 5);
-        cible.setPv(cible.getPv() - degats);
-        System.out.println(cible.getNom() + " subit " + degats + " dégâts !");
-        
+
+        // Dégâts standards (attaque - défense + 5)
+        applyStandardDamage(attaquant, cible, 5, "Souffle Draconique");
+
         // 20% de chance de paralyser
-        if (Math.random() < 0.2) {
+        if (Math.random() < 0.20) {
             cible.setEtat(Etat.PARALYSE);
             System.out.println(cible.getNom() + " est paralysé et risque de perdre un tour !");
         }

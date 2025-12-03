@@ -1,5 +1,10 @@
 package view;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +15,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -27,6 +33,8 @@ import javafx.scene.media.AudioClip;
 import javafx.util.Duration;
 import model.EnvironmentType;
 import model.actions.Action;
+
+
 
 public class BattleView extends BorderPane {
 
@@ -58,8 +66,31 @@ public class BattleView extends BorderPane {
         this.controller = controller;
         loadAudio();
         buildUI();
-        // wireActions is not used for static buttons anymore
+        redirectSystemOutToLog(); // 🔗 redirige System.out vers la TextArea
     }
+
+    // ---------------------------------------------------------
+    // Redirection de System.out vers ta TextArea
+    // ---------------------------------------------------------
+    private void redirectSystemOutToLog() {
+    PrintStream ps = new PrintStream(new OutputStream() {
+        private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+        @Override
+        public void write(int b) throws IOException {
+            if (b == '\n') {
+                // on convertit les octets accumulés en String UTF-8
+                String line = buffer.toString(StandardCharsets.UTF_8);
+                buffer.reset();
+                Platform.runLater(() -> taLog.appendText(line + "\n"));
+            } else {
+                buffer.write(b);
+            }
+        }
+    }, true, StandardCharsets.UTF_8);
+
+    System.setOut(ps);
+}
 
     private void loadAudio() {
         try {
@@ -144,7 +175,7 @@ public class BattleView extends BorderPane {
         imgPlayerPlatform.fitHeightProperty().bind(heightProperty().multiply(0.08));
 
         imgIaPlatform.fitWidthProperty().bind(widthProperty().multiply(0.18));
-        imgIaPlatform.fitHeightProperty().bind(heightProperty().multiply(0.08));
+        imgIaPlatform.fitHeightProperty().bind(widthProperty().multiply(0.08));
 
         // --- PV bars responsives ---
         pbPlayerHp.prefWidthProperty().bind(widthProperty().multiply(0.20));
@@ -187,8 +218,12 @@ public class BattleView extends BorderPane {
                 b.setDisable(true);
                 b.setOnAction(null);
             }
-            b.setOnMousePressed(e -> b.setScaleX(0.95));
-            b.setOnMousePressed(e -> b.setScaleY(0.95));
+
+            // Effet "press" simple
+            b.setOnMousePressed(e -> {
+                b.setScaleX(0.95);
+                b.setScaleY(0.95);
+            });
             b.setOnMouseReleased(e -> {
                 b.setScaleX(1.0);
                 b.setScaleY(1.0);
@@ -225,7 +260,6 @@ public class BattleView extends BorderPane {
             b.setOnMouseExited(e -> styleActionButtons()); // revenir au style normal
         }
     }
-
 
     public void bindNames(String playerName, String iaName) {
 
@@ -315,19 +349,18 @@ public class BattleView extends BorderPane {
     // PV bar animation
     // ---------------------------------------------------------
     public void refreshHp(int playerPv, int iaPv, int playerMax, int iaMax) {
-            lblPlayerHp.setText(playerPv + " / " + playerMax);
-            lblIaHp.setText(iaPv + " / " + iaMax);
-            animateBar(pbPlayerHp, (double) playerPv / playerMax);
-            animateBar(pbIaHp, (double) iaPv / iaMax);
-        }
+        lblPlayerHp.setText(playerPv + " / " + playerMax);
+        lblIaHp.setText(iaPv + " / " + iaMax);
+        animateBar(pbPlayerHp, (double) playerPv / playerMax);
+        animateBar(pbIaHp, (double) iaPv / iaMax);
+    }
 
-
-        private void animateBar(ProgressBar bar, double target) {
-            Timeline tl = new Timeline(
-                new KeyFrame(Duration.seconds(0.4),
+    private void animateBar(ProgressBar bar, double target) {
+        Timeline tl = new Timeline(
+            new KeyFrame(Duration.seconds(0.4),
                 new KeyValue(bar.progressProperty(), target, Interpolator.EASE_BOTH))
-            );
-            tl.play();
+        );
+        tl.play();
     }
 
     public void addLog(String message) {
@@ -346,7 +379,6 @@ public class BattleView extends BorderPane {
     // Animations Pokémon
     // ---------------------------------------------------------
 
-
     /** Sprite du joueur avance pour attaquer */
     public void animateHitOnEnemy() {
         TranslateTransition t = new TranslateTransition(Duration.seconds(0.15), imgPlayer);
@@ -359,7 +391,6 @@ public class BattleView extends BorderPane {
         flashSprite(imgIa);
         shakeScreen();
     }
-
 
     /** Sprite de l'ennemi avance pour attaquer */
     public void animateHitOnPlayer() {

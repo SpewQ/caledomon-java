@@ -13,6 +13,7 @@ model\Type.class
 model\actions\cagou\CoupDeBec.class
 controller\SelectionController.class
 model\Battle.class
+view\BattleView$2.class
 model\actions\tricotraye\EcailleToxique.class
 model\animals\TricotRaye.class
 view\BattleView$1.class
