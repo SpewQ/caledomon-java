@@ -63,7 +63,13 @@ public class BattleView extends BorderPane {
 
     private AudioClip sfxHit;
 
+    
+
     public BattleView(BattleController controller) {
+        this.getStyleClass().add("battle-background");
+        this.getStylesheets().add(
+            getClass().getResource("/styles/battle.css").toExternalForm()
+        );
         this.controller = controller;
         loadAudio();
         buildUI();
@@ -104,6 +110,7 @@ public class BattleView extends BorderPane {
     }
 
     private void buildUI() {
+        
         // --- Images setup (animaux) ---
         imgPlayer.setFitHeight(120);
         imgPlayer.setPreserveRatio(true);
@@ -142,6 +149,9 @@ public class BattleView extends BorderPane {
         // --- IA ---
         VBox iaBox = new VBox(5, iaSpriteStack, lblIaName, pbIaHp, lblIaHp);
         iaBox.setAlignment(Pos.CENTER);
+
+        pbPlayerHp.getStyleClass().add("player-hp-bar");
+        pbIaHp.getStyleClass().add("enemy-hp-bar");
 
         // --- Zone centrale ---
         HBox battleBox = new HBox(50, playerBox, iaBox);

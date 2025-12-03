@@ -16,7 +16,7 @@ public class MainApp extends Application {
 
         new SelectionController(stage, selectionView);
 
-        Scene selectionScene = new Scene(selectionView, 800, 500);
+        Scene selectionScene = new Scene(selectionView, 1280, 720);
         stage.setTitle("Sélection du Calédomon");
         stage.getIcons().add(icon);
         stage.setScene(selectionScene);

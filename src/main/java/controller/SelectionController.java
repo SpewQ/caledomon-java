@@ -84,7 +84,7 @@ public class SelectionController {
     }
 
     private void switchSceneWithFade(javafx.scene.Parent root) {
-        Scene scene = new Scene(root, 800, 600);
+        Scene scene = new Scene(root, 1280, 720);
         // appliquer un fade in sur le root après setScene
         stage.setScene(scene);
         FadeTransition ft = new FadeTransition(Duration.millis(400), root);
