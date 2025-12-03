@@ -1,21 +1,29 @@
 package model.actions.tricotraye;
 
 import model.Animal;
-import model.Etat;
 import model.actions.Action;
 
-public class SouffleDraconique implements Action {
+public class SouffleDraconique extends Action {
+
+    public SouffleDraconique() {
+        super(20, 90);
+    } // plus puissant, moins précis
 
     @Override
     public void executer(Animal attaquant, Animal cible) {
+
+        if (Math.random() * 100 > this.accuracy) {
+            System.out.println(attaquant.getNom() + " rate Souffle Draconique !");
+            return;
+        }
 
         // Dégâts standards (attaque - défense + 5)
         applyStandardDamage(attaquant, cible, 5, "Souffle Draconique");
 
         // 20% de chance de paralyser
-        if (Math.random() < 0.20) {
-            cible.setEtat(Etat.PARALYSE);
-            System.out.println(cible.getNom() + " est paralysé et risque de perdre un tour !");
+        // 30% chance de paralyser
+        if (Math.random() < 0.30) {
+            cible.applyStatusParalysis();
         }
     }
 }

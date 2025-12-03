@@ -128,17 +128,27 @@ public class BattleController {
 
         List<Runnable> seq = new ArrayList<>();
 
-        // 1) Log joueur
-        seq.add(() -> view.addLog("Le joueur utilise " + actionLabel(action) + " !"));
+        // 1) Regarde si le joueur est paralysé avant l'action
+        seq.add(() -> {
+            if (!battle.canAct(battle.getJoueur1())) {
+                view.addLog(battle.getJoueur1().getNom() + " est paralysé et ne peut pas agir !");
+                view.animateParalysisOnPlayer();
+            }
+        });
 
         // 2) Action joueur
         seq.add(() -> {
-            action.executer(battle.getJoueur1(), battle.getJoueur2());
-            view.refreshHp(
-                battle.getJoueur1().getPv(), battle.getJoueur2().getPv(),
-                battle.getJoueur1().getMaxPv(), battle.getJoueur2().getMaxPv()
-            );
-            view.animateHitOnEnemy();
+            boolean canAttack = battle.canAct(battle.getJoueur1());
+
+            view.animateHitOnEnemyIfAllowed(canAttack);
+
+            if (canAttack) {
+                action.executer(battle.getJoueur1(), battle.getJoueur2());
+                view.refreshHp(
+                    battle.getJoueur1().getPv(), battle.getJoueur2().getPv(),
+                    battle.getJoueur1().getMaxPv(), battle.getJoueur2().getMaxPv()
+                );
+            }
         });
 
         // 3) Vérification si l'ennemi meurt
@@ -147,26 +157,54 @@ public class BattleController {
         // 4) Log IA
         seq.add(() -> {
             if (!battle.combatTermine()) {
-                view.addLog("L'IA utilise " + actionLabel(iaAction) + " !");
+                if (!battle.canAct(battle.getJoueur2())) {
+                    view.addLog(battle.getJoueur2().getNom() + " est paralysé et ne peut pas agir !");
+                    view.animateParalysisOnEnemy();
+                }
             }
         });
 
         // 5) Action IA
         seq.add(() -> {
-            if (!battle.combatTermine()) {
+            boolean canIaAttack = battle.canAct(battle.getJoueur2());
+
+            view.animateHitOnPlayerIfAllowed(canIaAttack);
+
+            if (!battle.combatTermine() && canIaAttack) {
                 iaAction.executer(battle.getJoueur2(), battle.getJoueur1());
                 view.refreshHp(
                     battle.getJoueur1().getPv(), battle.getJoueur2().getPv(),
                     battle.getJoueur1().getMaxPv(), battle.getJoueur2().getMaxPv()
                 );
-                view.animateHitOnPlayer();
             }
         });
 
         // 6) Vérification si le joueur meurt
         seq.add(() -> checkEndBattle(false));
 
-        // 7) Réactivation des actions si le combat continue
+        // 7) Effets de statut (poison etc.)
+        seq.add(() -> {
+            if (!battle.combatTermine()) {
+                boolean someoneDied = battle.processEndOfTurn();
+
+                // Animations poison automatiques
+                if (battle.getJoueur1().isPoisoned()) view.animatePoisonOnPlayer();
+                if (battle.getJoueur2().isPoisoned()) view.animatePoisonOnEnemy();
+
+                // Mise à jour PV après poison
+                view.refreshHp(
+                    battle.getJoueur1().getPv(), battle.getJoueur2().getPv(),
+                    battle.getJoueur1().getMaxPv(), battle.getJoueur2().getMaxPv()
+                );
+
+                if (someoneDied) {
+                    if (!battle.getJoueur1().estVivant()) endBattle(false);
+                    else if (!battle.getJoueur2().estVivant()) endBattle(true);
+                }
+            }
+        });
+
+        // 8) Réactivation des actions si le combat continue
         seq.add(() -> {
             if (!battle.combatTermine()) {
                 view.enableActions();

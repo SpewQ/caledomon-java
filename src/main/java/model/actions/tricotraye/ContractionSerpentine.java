@@ -3,7 +3,11 @@ package model.actions.tricotraye;
 import model.Animal;
 import model.actions.Action;
 
-public class ContractionSerpentine implements Action {
+public class ContractionSerpentine extends Action {
+
+    public ContractionSerpentine() {
+        super(0, 100); // puissance "0" car calculée manuellement, précision 100% par défaut
+    }
 
     @Override
     public void executer(Animal attaquant, Animal cible) {

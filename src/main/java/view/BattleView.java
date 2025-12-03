@@ -23,6 +23,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -33,8 +34,6 @@ import javafx.scene.media.AudioClip;
 import javafx.util.Duration;
 import model.EnvironmentType;
 import model.actions.Action;
-
-
 
 public class BattleView extends BorderPane {
 
@@ -70,27 +69,27 @@ public class BattleView extends BorderPane {
     }
 
     // ---------------------------------------------------------
-    // Redirection de System.out vers ta TextArea
+    // Redirection de System.out vers la TextArea
     // ---------------------------------------------------------
     private void redirectSystemOutToLog() {
-    PrintStream ps = new PrintStream(new OutputStream() {
-        private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(new OutputStream() {
+            private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
-        @Override
-        public void write(int b) throws IOException {
-            if (b == '\n') {
-                // on convertit les octets accumulés en String UTF-8
-                String line = buffer.toString(StandardCharsets.UTF_8);
-                buffer.reset();
-                Platform.runLater(() -> taLog.appendText(line + "\n"));
-            } else {
-                buffer.write(b);
+            @Override
+            public void write(int b) throws IOException {
+                if (b == '\n') {
+                    // on convertit les octets accumulés en String UTF-8
+                    String line = buffer.toString(StandardCharsets.UTF_8);
+                    buffer.reset();
+                    Platform.runLater(() -> taLog.appendText(line + "\n"));
+                } else {
+                    buffer.write(b);
+                }
             }
-        }
-    }, true, StandardCharsets.UTF_8);
+        }, true, StandardCharsets.UTF_8);
 
-    System.setOut(ps);
-}
+        System.setOut(ps);
+    }
 
     private void loadAudio() {
         try {
@@ -175,7 +174,7 @@ public class BattleView extends BorderPane {
         imgPlayerPlatform.fitHeightProperty().bind(heightProperty().multiply(0.08));
 
         imgIaPlatform.fitWidthProperty().bind(widthProperty().multiply(0.18));
-        imgIaPlatform.fitHeightProperty().bind(widthProperty().multiply(0.08));
+        imgIaPlatform.fitHeightProperty().bind(heightProperty().multiply(0.08));
 
         // --- PV bars responsives ---
         pbPlayerHp.prefWidthProperty().bind(widthProperty().multiply(0.20));
@@ -218,12 +217,8 @@ public class BattleView extends BorderPane {
                 b.setDisable(true);
                 b.setOnAction(null);
             }
-
-            // Effet "press" simple
-            b.setOnMousePressed(e -> {
-                b.setScaleX(0.95);
-                b.setScaleY(0.95);
-            });
+            b.setOnMousePressed(e -> b.setScaleX(0.95));
+            b.setOnMousePressed(e -> b.setScaleY(0.95));
             b.setOnMouseReleased(e -> {
                 b.setScaleX(1.0);
                 b.setScaleY(1.0);
@@ -260,6 +255,7 @@ public class BattleView extends BorderPane {
             b.setOnMouseExited(e -> styleActionButtons()); // revenir au style normal
         }
     }
+
 
     public void bindNames(String playerName, String iaName) {
 
@@ -349,18 +345,19 @@ public class BattleView extends BorderPane {
     // PV bar animation
     // ---------------------------------------------------------
     public void refreshHp(int playerPv, int iaPv, int playerMax, int iaMax) {
-        lblPlayerHp.setText(playerPv + " / " + playerMax);
-        lblIaHp.setText(iaPv + " / " + iaMax);
-        animateBar(pbPlayerHp, (double) playerPv / playerMax);
-        animateBar(pbIaHp, (double) iaPv / iaMax);
-    }
+            lblPlayerHp.setText(playerPv + " / " + playerMax);
+            lblIaHp.setText(iaPv + " / " + iaMax);
+            animateBar(pbPlayerHp, (double) playerPv / playerMax);
+            animateBar(pbIaHp, (double) iaPv / iaMax);
+        }
 
-    private void animateBar(ProgressBar bar, double target) {
-        Timeline tl = new Timeline(
-            new KeyFrame(Duration.seconds(0.4),
+
+        private void animateBar(ProgressBar bar, double target) {
+            Timeline tl = new Timeline(
+                new KeyFrame(Duration.seconds(0.4),
                 new KeyValue(bar.progressProperty(), target, Interpolator.EASE_BOTH))
-        );
-        tl.play();
+            );
+            tl.play();
     }
 
     public void addLog(String message) {
@@ -379,8 +376,34 @@ public class BattleView extends BorderPane {
     // Animations Pokémon
     // ---------------------------------------------------------
 
-    /** Sprite du joueur avance pour attaquer */
-    public void animateHitOnEnemy() {
+    public void animateParalysisOnPlayer() {
+        animateParalysisEffect(imgPlayer);
+    }
+    public void animateParalysisOnEnemy() {
+        animateParalysisEffect(imgIa);
+    }
+    public void animatePoisonOnPlayer() {
+        animatePoisonEffect(imgPlayer);
+    }
+    public void animatePoisonOnEnemy() {
+        animatePoisonEffect(imgIa);
+    }
+    public void animateHitOnEnemyIfAllowed(boolean canAttack) {
+        animateHitOnEnemy(canAttack);
+    }
+    public void animateHitOnPlayerIfAllowed(boolean canAttack) {
+        animateHitOnPlayer(canAttack);
+    }
+
+
+    /** Sprite du joueur avance pour attaquer — annulé si paralysé */
+    public void animateHitOnEnemy(boolean canAttack) {
+        if (!canAttack) {
+            // Effet visuel de paralysie
+            animateParalysisEffect(imgPlayer);
+            return;
+        }
+
         TranslateTransition t = new TranslateTransition(Duration.seconds(0.15), imgPlayer);
         t.setByX(40);
         t.setAutoReverse(true);
@@ -392,8 +415,13 @@ public class BattleView extends BorderPane {
         shakeScreen();
     }
 
-    /** Sprite de l'ennemi avance pour attaquer */
-    public void animateHitOnPlayer() {
+    /** Sprite de l'ennemi avance pour attaquer — annulé si paralysé */
+    public void animateHitOnPlayer(boolean canAttack) {
+        if (!canAttack) {
+            animateParalysisEffect(imgIa);
+            return;
+        }
+
         TranslateTransition t = new TranslateTransition(Duration.seconds(0.15), imgIa);
         t.setByX(-40);
         t.setAutoReverse(true);
@@ -413,6 +441,46 @@ public class BattleView extends BorderPane {
         f.setAutoReverse(true);
         f.setCycleCount(4);
         f.play();
+    }
+
+    /** Animation poison (flash violet) */
+    public void animatePoisonEffect(ImageView iv) {
+        ColorAdjust purple = new ColorAdjust();
+        purple.setHue(0.6); // violet
+        iv.setEffect(purple);
+
+        FadeTransition f = new FadeTransition(Duration.seconds(0.12), iv);
+        f.setFromValue(1);
+        f.setToValue(0.3);
+        f.setCycleCount(4);
+        f.setAutoReverse(true);
+        f.play();
+
+        f.setOnFinished(e -> iv.setEffect(null)); // reviens à l'état normal
+    }
+
+    /** Animation paralysie (flash jaune rapide + micro-shake) */
+    public void animateParalysisEffect(ImageView iv) {
+        ColorAdjust yellow = new ColorAdjust();
+        yellow.setHue(-0.25); // jaune
+        iv.setEffect(yellow);
+
+        FadeTransition f = new FadeTransition(Duration.seconds(0.08), iv);
+        f.setFromValue(1);
+        f.setToValue(0.3);
+        f.setCycleCount(6);
+        f.setAutoReverse(true);
+
+        // mini-tremblement ajouté
+        TranslateTransition shake = new TranslateTransition(Duration.seconds(0.06), iv);
+        shake.setByX(4);
+        shake.setAutoReverse(true);
+        shake.setCycleCount(6);
+
+        f.play();
+        shake.play();
+
+        f.setOnFinished(e -> iv.setEffect(null));
     }
 
     /** Tremblement de l'écran */

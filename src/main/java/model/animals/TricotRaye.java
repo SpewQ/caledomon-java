@@ -3,7 +3,6 @@ package model.animals;
 import java.util.List;
 
 import model.Animal;
-import model.Etat;
 import model.Type;
 import model.actions.tricotraye.ContractionSerpentine;
 import model.actions.tricotraye.EcailleToxique;
@@ -27,21 +26,20 @@ public class TricotRaye extends Animal {
         );
     }
 
-    // On peut garder un getter si besoin, hérité par Animal.getActions()
-
     @Override
     public void actionSpeciale(Animal cible) {
-        System.out.println("Le Tricot Rayé mord et empoisonne " + cible.getNom() + " !");
-        cible.setEtat(Etat.EMPOISONNE);
+        // si tu veux un sort signature, le définir ici
     }
 
     @Override
     public Animal copy() {
-        TricotRaye clone = new TricotRaye();
-
-        // copie des actions (shallow copy, suffisant si les actions sont stateless)
-        clone.setActions(this.actions);
-
-        return clone;
+        TricotRaye t = new TricotRaye();
+        t.attackStage = 0;
+        t.defenseStage = 0;
+        t.speedStage = 0;
+        t.poisoned = false;
+        t.paralyzed = false;
+        t.setPv(t.getMaxPv());
+        return t;
     }
 }

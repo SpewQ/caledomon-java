@@ -2,7 +2,7 @@ package model.actions;
 
 import model.Animal;
 
-public class HealAction implements Action {
+public class HealAction extends Action {
     @Override
     public void executer(Animal attaquant, Animal cible) {
         attaquant.soigner();

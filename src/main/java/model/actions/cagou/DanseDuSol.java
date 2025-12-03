@@ -3,13 +3,17 @@ package model.actions.cagou;
 import model.Animal;
 import model.actions.Action;
 
-public class DanseDuSol implements Action {
+public class DanseDuSol extends Action {
+    
+    public DanseDuSol() { 
+        super(0, 100);
+    }
+
     @Override
-    public void executer(Animal attaquant, Animal cible) {
-        int oldDef = attaquant.getDefense();
-        int oldVit = attaquant.getVitesse();
-        attaquant.setDefense(oldDef + 3);
-        attaquant.setVitesse(oldVit + 3);
-        System.out.println(attaquant.getNom() + " exécute Danse du Sol ! Défense (" + oldDef + " → " + attaquant.getDefense() + "), Vitesse (" + oldVit + " → " + attaquant.getVitesse() + ").");
+    public void executer(Animal user, Animal target) {
+        // cible peut être user pour self-buff
+        user.applyStage("defense", +1);
+        user.applyStage("speed", +1);
+        System.out.println(user.getNom() + " utilise Danse du Sol ! Défense et vitesse augmentées.");
     }
 }

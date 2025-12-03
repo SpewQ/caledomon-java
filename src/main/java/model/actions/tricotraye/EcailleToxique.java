@@ -3,7 +3,11 @@ package model.actions.tricotraye;
 import model.Animal;
 import model.actions.Action;
 
-public class EcailleToxique implements Action {
+public class EcailleToxique extends Action {
+
+    public EcailleToxique() {
+        super(10, 80); // puissance approximative 10, précision 80%
+    }
 
     @Override
     public void executer(Animal attaquant, Animal cible) {
