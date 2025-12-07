@@ -11,7 +11,7 @@ import model.actions.cagou.SautDeBrousse;
 
 public class Cagou extends Animal {
     public Cagou() {
-        super("Cagou", 100, 20, 15, 12, Type.AERIEN);
+        super("Cagou", 100, 36, 16, 12, Type.AERIEN);
         this.actions = List.of(
             new CoupDeBec(),
             new SautDeBrousse(), 

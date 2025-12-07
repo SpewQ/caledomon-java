@@ -44,7 +44,7 @@ public class SelectionController {
         Animal player = AnimalFactory.createAnimal(chosenName);
 
         // IA aléatoire
-        String[] list = { "Cagou", "Gecko", "Tricot Raye" };
+        String[] list = { "Baobab", "Cagou", "Cerf", "Dawa", "Gecko", "Notou", "Picot", "Roussette", "Tortue", "Ver", "Tricot Raye" };
         String iaName = list[new Random().nextInt(list.length)];
         Animal ia = AnimalFactory.createAnimal(iaName);
 

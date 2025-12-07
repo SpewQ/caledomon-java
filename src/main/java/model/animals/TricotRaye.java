@@ -15,7 +15,7 @@ import model.actions.tricotraye.SouffleDraconique;
 public class TricotRaye extends Animal {
 
     public TricotRaye() {
-        super("TricotRaye", 80, 12, 10, 14, Type.MARIN);
+        super("TricotRaye", 85, 19, 21, 14, Type.MARIN);
 
         // initialise la liste d'actions pour cet Animal
         this.actions = List.of(

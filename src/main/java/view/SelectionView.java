@@ -6,7 +6,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
@@ -23,26 +23,67 @@ public class SelectionView extends VBox {
         Text title = new Text("Choisissez votre Calédomon");
         title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
 
-        Button btnCagou = createAnimalButton("Cagou");
-        Button btnGecko = createAnimalButton("Gecko");
-        Button btnTricot = createAnimalButton("Tricot Raye");
+        // --- Boutons des Calédomons ---
 
+        Button btnBaobab = createAnimalButton("Baobab");
+        Button btnCagou = createAnimalButton("Cagou");
+        Button btnCerf = createAnimalButton("Cerf");
+        Button btnDawa = createAnimalButton("Dawa");
+        Button btnGecko = createAnimalButton("Gecko");
+        Button btnNotou = createAnimalButton("Notou");
+        Button btnPicot = createAnimalButton("Picot");
+        Button btnRoussette = createAnimalButton("Roussette");
+        Button btnTortue = createAnimalButton("Tortue");
+        Button btnTricot = createAnimalButton("Tricot Raye");
+        Button btnVer = createAnimalButton("Ver");
+
+        btnBaobab.setOnAction(e -> notifySelection("Baobab"));
         btnCagou.setOnAction(e -> notifySelection("Cagou"));
+        btnCerf.setOnAction(e -> notifySelection("Cerf"));
+        btnDawa.setOnAction(e -> notifySelection("Dawa"));
         btnGecko.setOnAction(e -> notifySelection("Gecko"));
+        btnNotou.setOnAction(e -> notifySelection("Notou"));
+        btnPicot.setOnAction(e -> notifySelection("Picot"));
+        btnRoussette.setOnAction(e -> notifySelection("Roussette"));
+        btnTortue.setOnAction(e -> notifySelection("Tortue"));
         btnTricot.setOnAction(e -> notifySelection("Tricot Raye"));
+        btnVer.setOnAction(e -> notifySelection("Ver"));
 
         title.styleProperty().bind(
             Bindings.concat("-fx-font-size: ", heightProperty().multiply(0.06).asString(), ";")
         );
 
+        btnBaobab.prefWidthProperty().bind(widthProperty().multiply(0.25));
         btnCagou.prefWidthProperty().bind(widthProperty().multiply(0.25));
+        btnCerf.prefWidthProperty().bind(widthProperty().multiply(0.25));
+        btnDawa.prefWidthProperty().bind(widthProperty().multiply(0.25));
         btnGecko.prefWidthProperty().bind(widthProperty().multiply(0.25));
+        btnNotou.prefWidthProperty().bind(widthProperty().multiply(0.25));
+        btnPicot.prefWidthProperty().bind(widthProperty().multiply(0.25));
+        btnRoussette.prefWidthProperty().bind(widthProperty().multiply(0.25));
+        btnTortue.prefWidthProperty().bind(widthProperty().multiply(0.25));
         btnTricot.prefWidthProperty().bind(widthProperty().multiply(0.25));
+        btnVer.prefWidthProperty().bind(widthProperty().multiply(0.25));
 
-        HBox box = new HBox(20, btnCagou, btnGecko, btnTricot);
-        box.setAlignment(Pos.CENTER);
+        GridPane grid = new GridPane();
+        grid.setHgap(20);
+        grid.setVgap(20);
+        grid.setAlignment(Pos.CENTER);
 
-        getChildren().addAll(title, box);
+        Button[] buttons = {
+            btnBaobab, btnCagou, btnCerf, btnDawa, btnGecko, btnNotou,
+            btnPicot, btnRoussette, btnTortue, btnTricot, btnVer
+        };
+
+        // 3 boutons par ligne
+        int columns = 3;
+        for (int i = 0; i < buttons.length; i++) {
+            int row = i / columns;
+            int col = i % columns;
+            grid.add(buttons[i], col, row);
+        }
+
+        getChildren().addAll(title, grid);
     }
 
     private Button createAnimalButton(String name) {
