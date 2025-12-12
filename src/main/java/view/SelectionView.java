@@ -1,19 +1,33 @@
 package view;
 
 import javafx.beans.binding.Bindings;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import model.animals.Baobab;
+import model.animals.Cagou;
+import model.animals.Cerf;
+import model.animals.Dawa;
+import model.animals.Gecko;
+import model.animals.Notou;
+import model.animals.Picot;
+import model.animals.Roussette;
+import model.animals.Tortue;
+import model.animals.TricotRaye;
+import model.animals.Ver;
 
 public class SelectionView extends VBox {
 
     // callback when selection confirmed
     private java.util.function.Consumer<String> onSelected;
+    private final CaledomonInfoPane infoPane = new CaledomonInfoPane();
 
     public SelectionView() {
         setSpacing(20);
@@ -23,19 +37,29 @@ public class SelectionView extends VBox {
         Text title = new Text("Choisissez votre Calédomon");
         title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
 
+        GridPane grid = new GridPane();
+        grid.setHgap(20);
+        grid.setVgap(20);
+        grid.setAlignment(Pos.CENTER);
+
+        // Layout principal
+        StackPane rootLayer = new StackPane(grid, infoPane);
+        rootLayer.setPrefHeight(480);
+        StackPane.setAlignment(infoPane, Pos.TOP_LEFT);
+
         // --- Boutons des Calédomons ---
 
-        Button btnBaobab = createAnimalButton("Baobab");
-        Button btnCagou = createAnimalButton("Cagou");
-        Button btnCerf = createAnimalButton("Cerf");
-        Button btnDawa = createAnimalButton("Dawa");
-        Button btnGecko = createAnimalButton("Gecko");
-        Button btnNotou = createAnimalButton("Notou");
-        Button btnPicot = createAnimalButton("Picot");
-        Button btnRoussette = createAnimalButton("Roussette");
-        Button btnTortue = createAnimalButton("Tortue");
-        Button btnTricot = createAnimalButton("Tricot Raye");
-        Button btnVer = createAnimalButton("Ver");
+        Button btnBaobab = createAnimalButton("Baobab", new Baobab(), rootLayer);
+        Button btnCagou = createAnimalButton("Cagou", new Cagou(), rootLayer);
+        Button btnCerf = createAnimalButton("Cerf", new Cerf(), rootLayer);
+        Button btnDawa = createAnimalButton("Dawa", new Dawa(), rootLayer);
+        Button btnGecko = createAnimalButton("Gecko", new Gecko(), rootLayer);
+        Button btnNotou = createAnimalButton("Notou", new Notou(), rootLayer);
+        Button btnPicot = createAnimalButton("Picot", new Picot(), rootLayer);
+        Button btnRoussette = createAnimalButton("Roussette", new Roussette(), rootLayer);
+        Button btnTortue = createAnimalButton("Tortue", new Tortue(), rootLayer);
+        Button btnTricot = createAnimalButton("Tricot Raye", new TricotRaye(), rootLayer);
+        Button btnVer = createAnimalButton("Ver", new Ver(), rootLayer);
 
         btnBaobab.setOnAction(e -> notifySelection("Baobab"));
         btnCagou.setOnAction(e -> notifySelection("Cagou"));
@@ -65,11 +89,6 @@ public class SelectionView extends VBox {
         btnTricot.prefWidthProperty().bind(widthProperty().multiply(0.25));
         btnVer.prefWidthProperty().bind(widthProperty().multiply(0.25));
 
-        GridPane grid = new GridPane();
-        grid.setHgap(20);
-        grid.setVgap(20);
-        grid.setAlignment(Pos.CENTER);
-
         Button[] buttons = {
             btnBaobab, btnCagou, btnCerf, btnDawa, btnGecko, btnNotou,
             btnPicot, btnRoussette, btnTortue, btnTricot, btnVer
@@ -82,11 +101,12 @@ public class SelectionView extends VBox {
             int col = i % columns;
             grid.add(buttons[i], col, row);
         }
+        
 
-        getChildren().addAll(title, grid);
+        getChildren().addAll(title, rootLayer);
     }
 
-    private Button createAnimalButton(String name) {
+    private Button createAnimalButton(String name, model.Animal animalData, StackPane rootLayer) {
         Button b = new Button(name);
     
         // --- Image du Calédomon ---
@@ -117,19 +137,41 @@ public class SelectionView extends VBox {
         b.setStyle(baseStyle);
 
         // --- Hover effect ---
-        b.setOnMouseEntered(e -> b.setStyle("""
-            -fx-background-color: linear-gradient(#00e5ff, #00a370);
-            -fx-text-fill: white;
-            -fx-font-size: 16px;
-            -fx-font-weight: bold;
-            -fx-background-radius: 15;
-            -fx-border-radius: 15;
-            -fx-border-color: #ffd700;
-            -fx-border-width: 2;
-            -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 6,0,0,3);
-            -fx-padding: 10 20 10 20;
-        """));
-        b.setOnMouseExited(e -> b.setStyle(baseStyle));
+        b.setOnMouseEntered(e -> {
+            // Récupère les bounds du bouton en coordonnées de scène
+            Bounds btnBounds = b.localToScene(b.getBoundsInLocal());
+
+            // Convertit en coordonnées locales du parent (rootLayer)
+            javafx.geometry.Point2D localPoint = rootLayer.sceneToLocal(btnBounds.getMinX(), btnBounds.getMaxY());
+
+            // Centre horizontalement le panneau sous le bouton
+            double candidateX = localPoint.getX() + (btnBounds.getWidth() / 2.0) - (infoPane.getPrefWidth() / 2.0);
+            double candidateY = localPoint.getY() + 6; // petit margin de 6px sous le bouton
+
+            // Clamp pour rester à l’intérieur de rootLayer
+            double parentW = rootLayer.getWidth();
+            double parentH = rootLayer.getHeight();
+
+            double paneW = infoPane.getPrefWidth();
+            double paneH = infoPane.getPrefHeight();
+
+            if (candidateX < 8) candidateX = 8;
+            if (candidateX + paneW + 8 > parentW) candidateX = parentW - paneW - 8;
+
+            if (candidateY + paneH + 8 > parentH) {
+                // Si pas assez de place en bas, on place au-dessus du bouton
+                candidateY = localPoint.getY() - paneH - 6;
+                if (candidateY < 8) candidateY = 8;
+            }
+
+            infoPane.showForAt(animalData, candidateX, candidateY, parentW, parentH);
+        });
+
+
+        b.setOnMouseExited(e -> {
+            infoPane.hidePane();
+        });
+
 
         // --- Click animation ---
         b.setOnMousePressed(e -> {

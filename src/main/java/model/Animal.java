@@ -97,12 +97,7 @@ public abstract class Animal {
     }
 
     private static double stageMultiplier(int stage) {
-        // utiliser la table Pokémon-like (arrondie)
-        if (stage >= 0) {
-            return (stage + 2) / 2.0; // stage 0 -> 1.0, +1 -> 1.5, +2 -> 2.0 ...
-        } else {
-            return 2.0 / (Math.abs(stage) + 2); // -1 -> 2/3, -2 -> 2/4=0.5 ...
-        }
+        return 1.0 + stage * 0.1; // chaque stage = +10% / -10%
     }
 
     public void applyStage(String stat, int delta) {

@@ -46,6 +46,7 @@ main\MainApp.class
 model\actions\cerf\BruitDeSabots.class
 model\actions\gecko\Acceleration.class
 model\actions\cagou\CoupDeBec.class
+view\CaledomonInfoPane.class
 model\actions\notou\SerreDeNuit.class
 model\actions\roussette\OndeSonique.class
 model\actions\roussette\NuageToxique.class

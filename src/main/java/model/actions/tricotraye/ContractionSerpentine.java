@@ -6,7 +6,7 @@ import model.actions.Action;
 public class ContractionSerpentine extends Action {
 
     public ContractionSerpentine() {
-        super(0, 100); // puissance "0" car calculée manuellement, précision 100% par défaut
+        super(10, 100);
     }
 
     @Override

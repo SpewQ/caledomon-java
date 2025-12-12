@@ -30,10 +30,12 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.AudioClip;
 import javafx.util.Duration;
+import model.Animal;
 import model.EnvironmentType;
 import model.actions.Action;
 
@@ -60,6 +62,9 @@ public class BattleView extends BorderPane {
     private final List<Button> actionButtons = new ArrayList<>();
 
     private final TextArea taLog = new TextArea();
+
+    private final ActionInfoPane actionInfoLeft = new ActionInfoPane();
+
 
     private AudioClip sfxHit;
 
@@ -159,6 +164,20 @@ public class BattleView extends BorderPane {
         battleBox.setPadding(new Insets(20));
         setCenter(battleBox);
 
+        // Pour que les infos latérales flottent au-dessus du combat, on utilise un StackPane
+        Pane overlayPane = new Pane();
+        overlayPane.setPickOnBounds(false); // permet de cliquer à travers
+        overlayPane.getChildren().addAll(actionInfoLeft);
+
+        // Positionner à gauche/droite
+        actionInfoLeft.setLayoutX(10);
+        actionInfoLeft.setLayoutY(50);
+
+        // Ajouter overlayPane au-dessus du centre
+        StackPane centerStack = new StackPane();
+        centerStack.getChildren().addAll(battleBox, overlayPane);
+        setCenter(centerStack);
+
         // --- Boutons (placeholder HBox, les boutons seront ajoutés dynamiquement) ---
         HBox actionBox = new HBox(10);
         actionBox.setAlignment(Pos.CENTER);
@@ -214,27 +233,34 @@ public class BattleView extends BorderPane {
      * Charge les actions (moves) du joueur et met à jour les boutons.
      */
     public void setPlayerActions(List<Action> moves) {
-        // on suppose jusqu'à 4 moves ; si moins, on désactive certains boutons
         for (int i = 0; i < actionButtons.size(); i++) {
             Button b = actionButtons.get(i);
             if (i < moves.size()) {
                 Action act = moves.get(i);
-                // label via controller (plus lisible)
                 b.setText(controller.actionLabel(act));
                 b.setDisable(false);
                 int finalI = i;
                 b.setOnAction(e -> controller.onPlayerAction(moves.get(finalI)));
+
+                // --- Hover pour infos latérales ---
+                b.setOnMouseEntered(e -> {
+                    // Si c'est un Buff, target = joueur ; si Débuff, target = ennemi
+                    Animal target = null;
+                    if (act.isBuff()) target = controller.getPlayer();
+                    else if (act.isDebuff()) target = controller.getIa();
+
+                    actionInfoLeft.showFor(act, target, getWidth(), true);
+                });
+                b.setOnMouseExited(e -> {
+                    actionInfoLeft.hidePane();
+                });
+
             } else {
-                b.setText("-");
-                b.setDisable(true);
-                b.setOnAction(null);
+                b.setText("-"); b.setDisable(true); b.setOnAction(null);
+                b.setOnMouseEntered(null); b.setOnMouseExited(null);
             }
-            b.setOnMousePressed(e -> b.setScaleX(0.95));
-            b.setOnMousePressed(e -> b.setScaleY(0.95));
-            b.setOnMouseReleased(e -> {
-                b.setScaleX(1.0);
-                b.setScaleY(1.0);
-            });
+            b.setOnMousePressed(e -> { b.setScaleX(0.95); b.setScaleY(0.95); });
+            b.setOnMouseReleased(e -> { b.setScaleX(1.0); b.setScaleY(1.0); });
         }
     }
 

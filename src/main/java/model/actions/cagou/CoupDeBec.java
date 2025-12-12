@@ -6,7 +6,7 @@ import model.actions.Action;
 public class CoupDeBec extends Action {
 
     public CoupDeBec() {
-        super(15, 100);
+        super(19, 100);
     }
 
     @Override

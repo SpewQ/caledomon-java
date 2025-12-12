@@ -6,7 +6,7 @@ import model.actions.Action;
 public class EcailleToxique extends Action {
 
     public EcailleToxique() {
-        super(10, 80); // puissance approximative 10, précision 80%
+        super(30, 70);
     }
 
     @Override

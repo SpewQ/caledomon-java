@@ -6,7 +6,7 @@ import model.actions.Action;
 public class SautDeBrousse extends Action {
 
     public SautDeBrousse() { 
-        super(28, 30);
+        super(40, 70);
     } // plus de puissance, moins précis
 
     @Override

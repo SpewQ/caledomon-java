@@ -10,6 +10,7 @@ import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
+import model.Animal;
 import model.Battle;
 import model.EnvironmentType;
 import model.actions.Action;
@@ -44,6 +45,10 @@ public class BattleController {
         this.battle = battle;
         loadAudio();
     }
+
+    public Animal getPlayer() { return battle.getJoueur1(); }
+    public Animal getIa() { return battle.getJoueur2(); }
+
 
     private void loadAudio() {
         try {
