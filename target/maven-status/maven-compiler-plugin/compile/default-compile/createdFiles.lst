@@ -33,6 +33,7 @@ model\actions\tricotraye\ContractionSerpentine.class
 model\actions\ver\FilEntravant.class
 model\actions\cerf\RegardTerrifiant.class
 model\actions\roussette\Nocturnisation.class
+view\ActionInfoPane.class
 view\ResultView.class
 model\actions\tricotraye\SouffleDraconique.class
 model\animals\Roussette.class

@@ -32,10 +32,21 @@ public class SelectionView extends VBox {
     public SelectionView() {
         setSpacing(20);
         setPadding(new Insets(20));
-        setAlignment(Pos.CENTER);
+        setAlignment(Pos.TOP_CENTER);
+
+        // --- Logo du jeu ---
+        try {
+            Image logoImg = new Image(getClass().getResourceAsStream("/images/icon.png"));
+            ImageView logoView = new ImageView(logoImg);
+            logoView.setFitWidth(200); // largeur souhaitée
+            logoView.setPreserveRatio(true);
+            getChildren().add(logoView); // ajoute le logo en premier
+        } catch (Exception e) {
+            System.err.println("Logo introuvable : " + e.getMessage());
+        }
 
         Text title = new Text("Choisissez votre Calédomon");
-        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
         GridPane grid = new GridPane();
         grid.setHgap(20);
@@ -111,7 +122,8 @@ public class SelectionView extends VBox {
     
         // --- Image du Calédomon ---
         try {
-            Image img = new Image(getClass().getResourceAsStream("/images/" + name.toLowerCase() + ".png"));
+            String fileName = name.toLowerCase().replace(" ", "_") + ".png";
+            Image img = new Image(getClass().getResourceAsStream("/images/" + fileName));
             ImageView iv = new ImageView(img);
             iv.setFitHeight(80);
             iv.setPreserveRatio(true);

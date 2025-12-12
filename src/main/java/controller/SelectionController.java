@@ -3,7 +3,7 @@ package controller;
 import java.util.Random;
 
 import javafx.animation.FadeTransition;
-import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
 import javafx.scene.media.AudioClip;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -25,7 +25,7 @@ public class SelectionController {
         this.view = view;
         loadAudio();
 
-        // lorsque la vue signale une sélection : create battle
+        // Callback lors de la sélection d'un Calédomon
         this.view.setOnSelectionConfirmed(this::onSelect);
     }
 
@@ -33,7 +33,6 @@ public class SelectionController {
         try {
             var actionUrl = getClass().getResource("/sounds/button.mp3");
             if (actionUrl != null) sfxButton = new AudioClip(actionUrl.toExternalForm());
-
         } catch (Exception e) {
             System.err.println("Impossible de charger les sons : " + e.getMessage());
         }
@@ -41,6 +40,7 @@ public class SelectionController {
 
     private void onSelect(String chosenName) {
         if (sfxButton != null) sfxButton.play();
+
         Animal player = AnimalFactory.createAnimal(chosenName);
 
         // IA aléatoire
@@ -52,45 +52,60 @@ public class SelectionController {
         BattleController battleController = new BattleController(battle);
         BattleView battleView = new BattleView(battleController);
 
-        // permettre au controller de revenir vers le menu / afficher résultat
+        // Attacher le controller à la vue
         battleController.setView(battleView);
+
+        // Callback fin de combat → ResultView
         battleController.setOnBattleEnded(playerWon -> {
-            // crée la vue résultat
             String title = playerWon ? "Victoire !" : "Défaite...";
             String detail = playerWon ? "Bravo, vous avez vaincu votre adversaire." : "Votre Calédomon est K.O.";
             ResultView resultView = new ResultView(title, detail);
 
             resultView.setOnReturnToMenu(() -> {
-                // revenir au menu de sélection
-                SelectionView selectionView = new SelectionView();
-                // IMPORTANT : attacher un nouveau controller pour que les callbacks fonctionnent
-                new SelectionController(stage, selectionView);
-                switchSceneWithFade(selectionView);
+                SelectionView newSelection = new SelectionView();
+                new SelectionController(stage, newSelection);
+                switchView(newSelection);
             });
 
-            // afficher la scène résultat
-            switchSceneWithFade(resultView);
+            switchView(resultView);
         });
 
-        // faire une transition en fondu vers la scène de combat
-        switchSceneWithFade(battleView);
+        switchView(battleView);
 
         stage.setTitle("Combat Calédomon");
-        stage.sizeToScene();
-        stage.centerOnScreen();
+        stage.setMaximized(true);
 
-        // start the battle (initializes UI)
         battleController.startBattle();
     }
 
-    private void switchSceneWithFade(javafx.scene.Parent root) {
-        Scene scene = new Scene(root, 1280, 720);
-        // appliquer un fade in sur le root après setScene
-        stage.setScene(scene);
-        FadeTransition ft = new FadeTransition(Duration.millis(400), root);
-        ft.setFromValue(0.0);
-        ft.setToValue(1.0);
-        ft.play();
-    }
+    /**
+     * Change la vue dans le StackPane racine avec fade transition.
+     */
+    private void switchView(javafx.scene.Parent newView) {
+        StackPane root = (StackPane) stage.getScene().getRoot();
 
+        final javafx.scene.Node oldView;
+        if (!root.getChildren().isEmpty()) {
+            oldView = root.getChildren().get(0);
+        } else {
+            oldView = null;
+        }
+
+        root.getChildren().add(newView);
+
+        // Fade in nouvelle vue
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(400), newView);
+        fadeIn.setFromValue(0.0);
+        fadeIn.setToValue(1.0);
+        fadeIn.play();
+
+        // Fade out ancienne vue
+        if (oldView != null) {
+            FadeTransition fadeOut = new FadeTransition(Duration.millis(400), oldView);
+            fadeOut.setFromValue(1.0);
+            fadeOut.setToValue(0.0);
+            fadeOut.setOnFinished(e -> root.getChildren().remove(oldView));
+            fadeOut.play();
+        }
+    }
 }
