@@ -19,6 +19,10 @@ import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import model.Animal;
 
+/**
+ * Classe publique CaledomonInfoPane pour afficher une fenêtre contenant des informations sur le Calédomon
+ * au survol du bouton de ce-dernier lors du menu de sélection
+ */
 public class CaledomonInfoPane extends VBox {
 
     private final Label nameText = new Label();
@@ -32,7 +36,9 @@ public class CaledomonInfoPane extends VBox {
 
     private FadeTransition fadeOut;
     
-
+    /**
+     * Constructeur par défaut
+     */
     public CaledomonInfoPane() {
 
         setSpacing(6);
@@ -84,6 +90,9 @@ public class CaledomonInfoPane extends VBox {
         setVisible(false);
     }
 
+    /**
+     * Méthode privée pour gérer les animations fade in / fade out de la fenêtre
+     */
     private void buildTransitions() {
         fadeIn = new FadeTransition(Duration.millis(180), this);
         fadeIn.setFromValue(0.0);
@@ -163,12 +172,18 @@ public class CaledomonInfoPane extends VBox {
         showTransition.playFromStart();
     }
 
+    /**
+     * Méthode publique pour masquer la fenêtre
+     */
     public void hidePane() {
         // stop show transition if running
         stopAnimations();
         fadeOut.playFromStart();
     }
 
+    /**
+     * Méthode privée pour arrêter les animations si nécessaire
+     */
     private void stopAnimations() {
         if (showTransition != null && showTransition.getStatus() == Animation.Status.RUNNING) {
             showTransition.stop();

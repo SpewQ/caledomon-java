@@ -5,7 +5,7 @@ import java.util.List;
 import model.actions.Action;
 
 /**
- * model/Animal.java - version avec stages & status
+ * model/Animal.java - version avec stages de stats & status
  */
 public abstract class Animal {
     protected String nom;
@@ -29,6 +29,15 @@ public abstract class Animal {
     // actions
     public List<Action> actions;
 
+    /**
+     * Constructeur de la classe Animal
+     * @param nom : nom du CalédoMon en chaîne de caractères
+     * @param pv : points de vie du CalédoMon en entier
+     * @param attaque : attaque du CalédoMon en entier
+     * @param defense : défense du CalédoMon en entier
+     * @param vitesse : vitesse du CalédoMon en entier
+     * @param type : type du CalédoMon en Type (défini dans Type.java)
+     */
     public Animal(String nom, int pv, int attaque, int defense, int vitesse, Type type) {
         this.nom = nom;
         this.pv = pv;
@@ -42,7 +51,7 @@ public abstract class Animal {
 
     public abstract void actionSpeciale(Animal cible);
 
-    // --- combat helpers ------------------------------------
+    // --- combat helpers (capacités par défaut si pas d'actions assignées)------------------------------------
     public void attaquer(Animal cible) {
         int base = Math.max(1, this.getRealAttack() - cible.getRealDefense());
         int degats = base;
@@ -85,21 +94,38 @@ public abstract class Animal {
     public int getMaxPv() { return maxPv; }
     public void setMaxPv(int maxPv) { this.maxPv = maxPv; }
 
-    // Actions
+    /**
+     * Getter de la liste d'actions
+     */
     public List<Action> getActions() { return actions; }
+
+    /**
+     * Setter de la liste d'actions
+     * @param actions : liste d'actions
+     */
     public void setActions(List<Action> actions) { this.actions = actions; }
 
-    // ----------------- stages & real stats -------------------
+    /**
+     * Méthode privée statique pour définir les limites de stages de stats (entre -6 et 6)
+     */
     private static int clampStage(int v) {
         if (v < -6) return -6;
         if (v > 6) return 6;
         return v;
     }
 
+    /**
+     * Méthode privée statique pour calculer le multiplicateur de modification de stat en fonction du stage
+     */
     private static double stageMultiplier(int stage) {
         return 1.0 + stage * 0.1; // chaque stage = +10% / -10%
     }
 
+    /**
+     * Méthode publique pour appliquer un stage de stat
+     * @param stat : stat concernée, en chaîne de caractères
+     * @param delta : différentiel en entier
+     */
     public void applyStage(String stat, int delta) {
         switch (stat.toLowerCase()) {
             case "attack":
@@ -118,21 +144,41 @@ public abstract class Animal {
         }
     }
 
+    /**
+     * Getter pour le stage d'attaque
+     */
     public int getAttackStage() { return attackStage; }
+
+    /**
+     * Getter pour le stage de défense
+     */
     public int getDefenseStage() { return defenseStage; }
+
+    /**
+     * Getter pour le stage de vitesse
+     */
     public int getSpeedStage() { return speedStage; }
 
+    /**
+     * Getter pour récupérer la vraie valeur d'attaque après calculs en fonction du multiplicateur de stage
+     */
     public int getRealAttack() {
         double mult = stageMultiplier(attackStage);
         // calcul en entier
         return (int) Math.max(1, Math.round(attaque * mult));
     }
 
+    /**
+     * Getter pour récupérer la vraie valeur de défense après calculs en fonction du multiplicateur de stage
+     */
     public int getRealDefense() {
         double mult = stageMultiplier(defenseStage);
         return (int) Math.max(0, Math.round(defense * mult));
     }
 
+    /**
+     * Getter pour récupérer la vraie valeur de vitesse après calculs en fonction du multiplicateur de stage
+     */
     public int getRealVitesse() {
         double mult = stageMultiplier(speedStage);
         int base = (int)Math.max(1, Math.round(vitesse * mult));
@@ -142,7 +188,9 @@ public abstract class Animal {
         return base;
     }
 
-    // ----------------- statuses ------------------------------
+    /**
+     * Méthode publique pour appliquer le poison à une entité
+     */
     public void applyStatusPoison() {
         if (!poisoned) {
             poisoned = true;
@@ -150,6 +198,9 @@ public abstract class Animal {
         }
     }
 
+    /**
+     * Méthode publique pour appliquer la paralysie à une entité
+     */
     public void applyStatusParalysis() {
         if (!paralyzed) {
             paralyzed = true;
@@ -157,7 +208,14 @@ public abstract class Animal {
         }
     }
 
+    /**
+     * Méthode publique pour renvoyer un booléen si une entité est empoisonnée ou non
+     */
     public boolean isPoisoned() { return poisoned; }
+
+    /**
+     * Méthode publique pour renvoyer un booléen si une entité est paralysée ou non
+     */
     public boolean isParalyzed() { return paralyzed; }
 
     /**

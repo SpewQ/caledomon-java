@@ -24,6 +24,9 @@ import model.actions.cagou.DanseDuSol;
 import model.actions.cagou.SautDeBrousse;
 import view.BattleView;
 
+/**
+ * Classe publique du contrôleur de Combat (BattleController), qui va gérer la logique de la vue Combat (BattleView)
+ */
 public class BattleController {
     private final Battle battle;
     private BattleView view;
@@ -41,15 +44,27 @@ public class BattleController {
     private AudioClip sfxBuff;
     private AudioClip sfxDebuff;
 
+    /**
+     * Initialisation de BattleController
+     */
     public BattleController(Battle battle) {
         this.battle = battle;
         loadAudio();
     }
 
+    /**
+     * Getter pour récupérer le joueur
+     */
     public Animal getPlayer() { return battle.getJoueur1(); }
+
+    /**
+     * Getter pour récupérer l'IA
+     */
     public Animal getIa() { return battle.getJoueur2(); }
 
-
+    /**
+     * Méthode privée pour charger la musique et les sons de CalédoMon
+     */
     private void loadAudio() {
         try {
             var bgmUrl = getClass().getResource("/sounds/bgm.mp3");
@@ -80,10 +95,18 @@ public class BattleController {
         }
     }
 
+    /**
+     * Setter pour s'assurer qu'on est en BattleView.
+     * @param view : vue BattleView récupérée
+     */
     public void setView(BattleView view) {
         this.view = view;
     }
 
+    /**
+     * Setter pour mettre l'état du combat en "Terminé" en fonction d'un callback
+     * @param callback : callback récupéré
+     */
     public void setOnBattleEnded(Consumer<Boolean> callback) {
         this.onBattleEnded = callback;
     }
@@ -127,6 +150,11 @@ public class BattleController {
         }
     }
 
+    /**
+     * Méthode publique qui décrit la logique du combat tour par tour lorsque le joueur sélectionne
+     * une action.
+     * @param action : action sélectionnée par le joueur
+     */
     public void onPlayerAction(Action action) {
         if (battle.combatTermine() || battleTermineeAlready) {
             view.addLog("Le combat est terminé.");
@@ -247,7 +275,10 @@ public class BattleController {
         playSequence(seq);
     }
 
-    // Méthode de vérification sécurisée
+    /**
+     * Méthode privée de vérification de la fin du combat, de manière sécurisée
+     * @param joueurATueEnnemi : booléen qui décrit si le joueur a tué l'ennemi ou non
+     */
     private void checkEndBattle(boolean joueurATueEnnemi) {
         if (!battleTermineeAlready && battle.combatTermine()) {
             battleTermineeAlready = true;
@@ -256,7 +287,7 @@ public class BattleController {
     }
 
     /**
-     * Choisit une action pour l'IA parmi ses actions si possible.
+     * Méthode privée qui choisit une action pour l'IA parmi ses actions si possible.
      */
     private Action randomIaAction() {
         List<Action> iaMoves = battle.getJoueur2().getActions();
@@ -273,6 +304,10 @@ public class BattleController {
         }
     }
 
+    /**
+     * Méthode privée qui termine le combat si le joueur a gagné (a.k.a vaincu l'ennemi)
+     * @param playerWon : booléen qui détermine si le joueur a gagné ou non
+     */
     private void endBattle(boolean playerWon) {
 
         view.disableActions();
@@ -297,8 +332,10 @@ public class BattleController {
     }
 
     /**
-     * Fournit un label lisible pour une action (utilisé aussi par la view).
+     * Méthode publique qui fournit un label lisible pour une action (utilisé aussi par la view).
      * Rendue publique pour que BattleView puisse l'utiliser.
+     * PS : Elle est utilisée si et seulement si le CalédoMon sélectionné n'a pas d'actions.
+     * @param a : action affichée
      */
     public String actionLabel(Action a) {
         if (a instanceof CoupDeBec)     return "Coup de Bec";
@@ -314,10 +351,20 @@ public class BattleController {
         return cn.replaceAll("([A-Z])", " $1").trim();
     }
     
+    /**
+     * Méthode privée qui permet de jouer la séquence de combat à la sélection d'une action
+     * @param actions : liste d'actions
+     */
     private void playSequence(List<Runnable> actions) {
         playSequenceRecursive(actions, 0);
     }
 
+    /**
+     * Méthode privée qui permet d'ajouter un délai entre chaque actions, pour que le déroulé du combat
+     * soit compréhensible par le joueur
+     * @param actions : liste d'actions
+     * @param index : index pour la liste d'actions
+     */
     private void playSequenceRecursive(List<Runnable> actions, int index) {
         if (index >= actions.size()) return;
 

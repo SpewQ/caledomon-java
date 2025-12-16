@@ -2,6 +2,9 @@ package model;
 
 import java.util.Random;
 
+/**
+ * Enumération publique des types d'environnements
+ */
 public enum EnvironmentType {
     GRASS,
     SAND,

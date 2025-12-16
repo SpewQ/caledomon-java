@@ -1,5 +1,8 @@
 package model;
 
+/**
+ * Enumération des types du CalédoMon
+ */
 public enum Type {
     TERRESTRE,
     AERIEN,

@@ -9,11 +9,11 @@ import model.actions.tricotraye.EcailleToxique;
 import model.actions.tricotraye.MorsureVenimeuse;
 import model.actions.tricotraye.SouffleDraconique;
 
-/**
- * model/animals/TricotRaye.java
- */
 public class TricotRaye extends Animal {
 
+    /**
+     * Constructeur de Tricot Rayé avec les paramètres de points de vie, attaque, défense, vitesse et type)
+     */
     public TricotRaye() {
         super("TricotRaye", 85, 19, 21, 14, Type.MARIN);
 

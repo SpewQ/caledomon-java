@@ -14,12 +14,20 @@ import view.BattleView;
 import view.ResultView;
 import view.SelectionView;
 
+/**
+ * Classe publique du contrôleur du menu de sélection (SelectionController)
+ */
 public class SelectionController {
 
     private final Stage stage;
     private final SelectionView view;
     private AudioClip sfxButton;
 
+    /**
+     * Constructeur de SelectionController
+     * @param stage : stage récupéré
+     * @param view : vue SelectionView récupérée
+     */
     public SelectionController(Stage stage, SelectionView view) {
         this.stage = stage;
         this.view = view;
@@ -29,6 +37,9 @@ public class SelectionController {
         this.view.setOnSelectionConfirmed(this::onSelect);
     }
 
+    /**
+     * Méthode privée pour charger le son du clic de sélection d'un CalédoMon
+     */
     private void loadAudio() {
         try {
             var actionUrl = getClass().getResource("/sounds/button.mp3");
@@ -38,6 +49,10 @@ public class SelectionController {
         }
     }
 
+    /**
+     * Méthode privée pour charger le CalédoMon sélectionné afin que le BattleController le récupère.
+     * @param chosenName : chaîne de caractères du CalédoMon sélectionné
+     */
     private void onSelect(String chosenName) {
         if (sfxButton != null) sfxButton.play();
 

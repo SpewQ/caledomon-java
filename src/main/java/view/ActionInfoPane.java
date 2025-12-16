@@ -22,6 +22,10 @@ import model.actions.Action;
 import model.actions.BuffAction;
 import model.actions.DebuffAction;
 
+/**
+ * Classe publique ActionInfoPane pour afficher une fenêtre contenant les informations d'une capacité
+ * lorsqu'on survol un bouton de capacité
+ */
 public class ActionInfoPane extends VBox {
 
     private final Label nameText = new Label();
@@ -34,6 +38,9 @@ public class ActionInfoPane extends VBox {
 
     private FadeTransition fadeOut;
 
+    /**
+     * Constructeur par défaut
+     */
     public ActionInfoPane() {
         setSpacing(8);
         setPadding(new Insets(12));
@@ -73,6 +80,9 @@ public class ActionInfoPane extends VBox {
         setVisible(false);
     }
 
+    /**
+     * Méthode privée pour faire les animations de transitions fade in / fade out au survol de la capacité
+     */
     private void buildTransitions() {
         fadeIn = new FadeTransition(Duration.millis(180), this);
         fadeIn.setFromValue(0.0);
@@ -113,24 +123,29 @@ public class ActionInfoPane extends VBox {
 
         detailsText.setText(sb.toString());
 
-    // Position latérale
-    double x = leftSide ? 10 : getParent().getLayoutBounds().getWidth() - getPrefWidth() - 10;
-    double y = 50;
-    setLayoutX(x);
-    setLayoutY(y);
+        // Position latérale
+        double x = leftSide ? 10 : getParent().getLayoutBounds().getWidth() - getPrefWidth() - 10;
+        double y = 50;
+        setLayoutX(x);
+        setLayoutY(y);
 
-    stopAnimations();
-    setOpacity(0);
-    setVisible(true);
-    showTransition.playFromStart();
-}
+        stopAnimations();
+        setOpacity(0);
+        setVisible(true);
+        showTransition.playFromStart();
+    }
 
-
+    /**
+     * Méthode publique pour masquer la fenêtre lorsque le curseur n'est pas sur le bouton d'action
+     */
     public void hidePane() {
         stopAnimations();
         fadeOut.playFromStart();
     }
 
+    /**
+     * Méthode privée pour arrêter les animations lorsque c'est nécessaire
+     */
     private void stopAnimations() {
         if (showTransition != null && showTransition.getStatus() == Animation.Status.RUNNING) showTransition.stop();
         if (fadeOut != null && fadeOut.getStatus() == Animation.Status.RUNNING) fadeOut.stop();

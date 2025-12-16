@@ -1,3 +1,24 @@
+/**
+ * <p>
+ * Classe <strong>AnimalFactory</strong>.
+ * </p>
+ *
+ * <p>
+ * Cette classe fait partie du cœur applicatif du projet et joue un rôle précis
+ * dans l'architecture globale (MVC). Elle encapsule un comportement métier,
+ * une logique de contrôle ou un composant d'interface selon son package.
+ * </p>
+ *
+ * <p>
+ * Les responsabilités principales de cette classe sont :
+ * </p>
+ * <ul>
+ *   <li>Centraliser la logique associée à AnimalFactory</li>
+ *   <li>Garantir la cohérence des données manipulées</li>
+ *   <li>Faciliter l'évolution et la maintenabilité du code</li>
+ * </ul>
+ */
+
 package model.factories;
 
 import model.Animal;
@@ -13,7 +34,15 @@ import model.animals.Tortue;
 import model.animals.TricotRaye;
 import model.animals.Ver;
 
+/**
+ * Classe publique AnimalFactory
+ */
 public class AnimalFactory {
+
+    /**
+     * Méthode publique statique createAnimal qui instancie un CalédoMon en fonction de son nom
+     * @param nom : chaîne de caractères du nom du CalédoMon
+     */
     public static Animal createAnimal(String nom) {
         if (nom == null) throw new IllegalArgumentException("Nom null");
         switch (nom.trim().toLowerCase()) {

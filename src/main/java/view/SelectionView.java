@@ -1,3 +1,24 @@
+/**
+ * <p>
+ * Classe <strong>SelectionView</strong>.
+ * </p>
+ *
+ * <p>
+ * Cette classe fait partie du cœur applicatif du projet et joue un rôle précis
+ * dans l'architecture globale (MVC). Elle encapsule un comportement métier,
+ * une logique de contrôle ou un composant d'interface selon son package.
+ * </p>
+ *
+ * <p>
+ * Les responsabilités principales de cette classe sont :
+ * </p>
+ * <ul>
+ *   <li>Centraliser la logique associée à SelectionView</li>
+ *   <li>Garantir la cohérence des données manipulées</li>
+ *   <li>Faciliter l'évolution et la maintenabilité du code</li>
+ * </ul>
+ */
+
 package view;
 
 import javafx.beans.binding.Bindings;
@@ -23,12 +44,18 @@ import model.animals.Tortue;
 import model.animals.TricotRaye;
 import model.animals.Ver;
 
+/**
+ * Classe publique SelectionView représentant la vue de sélection d'un CalédoMon
+ */
 public class SelectionView extends VBox {
 
-    // callback when selection confirmed
+    // callback quand la sélection est confirmée
     private java.util.function.Consumer<String> onSelected;
     private final CaledomonInfoPane infoPane = new CaledomonInfoPane();
 
+    /**
+     * Constructeur par défaut
+     */
     public SelectionView() {
         setSpacing(20);
         setPadding(new Insets(20));
@@ -117,6 +144,12 @@ public class SelectionView extends VBox {
         getChildren().addAll(title, rootLayer);
     }
 
+    /**
+     * Méthode privée pour créer un bouton d'un CalédoMon
+     * @param name : nom du CalédoMon en chaîne de caractères
+     * @param animalData : instance du CalédoMon récupérée
+     * @param rootLayer : Layout du menu de sélection sous StackPane
+     */
     private Button createAnimalButton(String name, model.Animal animalData, StackPane rootLayer) {
         Button b = new Button(name);
     
@@ -198,11 +231,17 @@ public class SelectionView extends VBox {
         return b;
     }
 
-
+    /**
+     * Méthode publique pour faire un callback à la sélection du CalédoMon
+     */
     public void setOnSelectionConfirmed(java.util.function.Consumer<String> callback) {
         this.onSelected = callback;
     }
 
+    /**
+     * Méthode privée pour notifier l'application de la sélection d'un CalédoMon
+     * @param name : nom du CalédoMon en chaîne de caractères
+     */
     private void notifySelection(String name) {
         System.out.println("[DEBUG] Calédomon sélectionné : " + name);
         if (onSelected != null) {

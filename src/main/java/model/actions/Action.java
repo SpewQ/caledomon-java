@@ -5,19 +5,34 @@ import model.Etat;
 import model.Type;
 import view.BattleView;
 
+/**
+ * Classe abstraite publique Action pour pouvoir instancier les capacités de chaque Calédomon
+ */
 public abstract class Action {
     // puissance conventionnelle (pour attaques)
     protected int power = 0;
     protected int accuracy = 100; // en pourcentage
     protected BattleView battleView;
 
+    /**
+     * Constructeur par défaut
+     */
     public Action() {}
 
+    /**
+     * Constructeur avec paramètres
+     * @param power : entier représentant la puissance d'une capacité
+     * @param accuracy : entier représentant la précision d'une capacité
+     */
     public Action(int power, int accuracy) {
         this.power = power;
         this.accuracy = accuracy;
     }
 
+    /**
+     * Méthode publique permettant de régler une vue de combat
+     * @param battleView : vue de combat
+     */
     public void setBattleView(BattleView battleView) {
         this.battleView = battleView;
     }
@@ -28,7 +43,14 @@ public abstract class Action {
      */
     public abstract void executer(Animal user, Animal target);
 
+    /**
+     * Getter pour l'attribut power
+     */
     public int getPower() { return power; }
+
+    /**
+     * Getter pour l'attribut accuracy
+     */
     public int getAccuracy() { return accuracy; }
 
     /**
@@ -64,7 +86,14 @@ public abstract class Action {
         }
     }
 
+    /**
+     * Méthode publique renvoyant un booléen si une action est un buff ou non
+     */
     public boolean isBuff() { return false; }
+
+    /**
+     * Méthode publique renvoyant un booléen si une action est un débuff ou non
+     */
     public boolean isDebuff() { return false; }
 
 }

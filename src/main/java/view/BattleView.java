@@ -39,6 +39,9 @@ import model.Animal;
 import model.EnvironmentType;
 import model.actions.Action;
 
+/**
+ * Classe publique BattleView représentant la vue de combat
+ */
 public class BattleView extends BorderPane {
 
     private final BattleController controller;
@@ -69,7 +72,10 @@ public class BattleView extends BorderPane {
     private AudioClip sfxHit;
 
     
-
+    /**
+     * Constructeur de BattleView
+     * @param controller : Contrôleur de combat
+     */
     public BattleView(BattleController controller) {
         this.getStyleClass().add("battle-background");
         this.getStylesheets().add(
@@ -81,9 +87,9 @@ public class BattleView extends BorderPane {
         redirectSystemOutToLog(); // 🔗 redirige System.out vers la TextArea
     }
 
-    // ---------------------------------------------------------
-    // Redirection de System.out vers la TextArea
-    // ---------------------------------------------------------
+    /**
+     * Méthode privée de redirection de System.out vers la TextArea
+     */
     private void redirectSystemOutToLog() {
         PrintStream ps = new PrintStream(new OutputStream() {
             private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -104,6 +110,9 @@ public class BattleView extends BorderPane {
         System.setOut(ps);
     }
 
+    /**
+     * Méthode privée pour charger l'audio d'un CalédoMon touché
+     */
     private void loadAudio() {
         try {
             var hitUrl = getClass().getResource("/sounds/hit.mp3");
@@ -114,6 +123,22 @@ public class BattleView extends BorderPane {
         }
     }
 
+    /**
+     * Méthode privée pour normaliser les noms d'images (remplacer certains caractères par d'autres)
+     */
+    private String normalizeImageName(String name) {
+        return name.toLowerCase()
+                .replace(" ", "_")
+                .replace("é", "e")
+                .replace("è", "e")
+                .replace("ê", "e")
+                .replace("à", "a")
+                .replace("ç", "c");
+    }
+
+    /**
+     * Méthode privée pour construire l'interface de la vue combat
+     */
     private void buildUI() {
         
         // --- Images setup (animaux) ---
@@ -264,6 +289,9 @@ public class BattleView extends BorderPane {
         }
     }
 
+    /**
+     * Méthode privée pour ajouter un style aux boutons d'action
+     */
     private void styleActionButtons() {
         for (Button b : actionButtons) {
             b.setStyle("""
@@ -294,7 +322,11 @@ public class BattleView extends BorderPane {
         }
     }
 
-
+    /**
+     * Méthode publique pour affecter les noms de CalédoMon en dessous des sprites
+     * @param playerName : nom du CalédoMon dujoueur en chaînes de caractères
+     * @param iaName : nom du CalédoMon de l'IA en chaînes de caractères
+     */
     public void bindNames(String playerName, String iaName) {
 
         lblPlayerName.setText(playerName);
@@ -309,28 +341,43 @@ public class BattleView extends BorderPane {
 
     }
 
+    /**
+     * Méthode publique pour affecter les sprites des CalédoMon en fonction de leur nom
+     * @param playerName : nom du CalédoMon dujoueur en chaînes de caractères
+     * @param iaName : nom du CalédoMon de l'IA en chaînes de caractères
+     */
     public void setImages(String playerName, String iaName) {
         try {
-            String pathPlayer = "/images/" + playerName.toLowerCase() + ".png";
-            String pathIa = "/images/" + iaName.toLowerCase() + ".png";
+            String playerFile = normalizeImageName(playerName);
+            String iaFile = normalizeImageName(iaName);
 
-            if (getClass().getResourceAsStream(pathPlayer) != null) {
-                imgPlayer.setImage(new Image(getClass().getResourceAsStream(pathPlayer)));
+            String pathPlayer = "/images/" + playerFile + ".png";
+            String pathIa = "/images/" + iaFile + ".png";
+
+            var isPlayer = getClass().getResourceAsStream(pathPlayer);
+            var isIa = getClass().getResourceAsStream(pathIa);
+
+            if (isPlayer != null) {
+                imgPlayer.setImage(new Image(isPlayer));
             } else {
-                System.err.println("Image joueur introuvable: " + pathPlayer);
+                System.err.println("❌ Image joueur introuvable : " + pathPlayer);
             }
 
-            if (getClass().getResourceAsStream(pathIa) != null) {
-                imgIa.setImage(new Image(getClass().getResourceAsStream(pathIa)));
+            if (isIa != null) {
+                imgIa.setImage(new Image(isIa));
             } else {
-                System.err.println("Image IA introuvable: " + pathIa);
+                System.err.println("❌ Image IA introuvable : " + pathIa);
             }
+
         } catch (Exception e) {
-            System.err.println("Erreur lors du chargement des images : " + e.getMessage());
+            System.err.println("Erreur chargement sprites : " + e.getMessage());
         }
     }
 
-    // Choisir le sol selon l'environnement du combat
+    
+    /**
+     * Méthode publique pour choisir l'environnement
+     */
     public void setEnvironment(EnvironmentType env) {
         try {
             String fileName;
@@ -379,9 +426,9 @@ public class BattleView extends BorderPane {
         }
     }
 
-    // ---------------------------------------------------------
-    // PV bar animation
-    // ---------------------------------------------------------
+    /**
+     * Méthode publique d'animation de la barre de vie
+     */
     public void refreshHp(int playerPv, int iaPv, int playerMax, int iaMax) {
             lblPlayerHp.setText(playerPv + " / " + playerMax);
             lblIaHp.setText(iaPv + " / " + iaMax);
@@ -398,14 +445,23 @@ public class BattleView extends BorderPane {
             tl.play();
     }
 
+    /**
+     * Méthode publique pour ajouter les messages dans la TextArea
+     */
     public void addLog(String message) {
         taLog.appendText(message + "\n");
     }
 
+    /**
+     * Méthode publique pour désactiver les boutons d'actions
+     */
     public void disableActions() {
         for (Button b : actionButtons) b.setDisable(true);
     }
 
+    /**
+     * Méthode publique pour activer les boutons d'actions
+     */
     public void enableActions() {
         for (Button b : actionButtons) b.setDisable(false);
     }
@@ -414,44 +470,80 @@ public class BattleView extends BorderPane {
     // Animations Pokémon
     // ---------------------------------------------------------
 
+    /**
+     * Méthode publique pour animer l'effet de paralysie sur le joueur
+     */
     public void animateParalysisOnPlayer() {
         animateParalysisEffect(imgPlayer);
     }
+
+    /**
+     * Méthode publique pour animer l'effet de paralysie sur l'IA
+     */
     public void animateParalysisOnEnemy() {
         animateParalysisEffect(imgIa);
     }
+
+    /**
+     * Méthode publique pour animer l'effet de poison sur le joueur
+     */
     public void animatePoisonOnPlayer() {
         animatePoisonEffect(imgPlayer);
     }
+
+    /**
+     * Méthode publique pour animer l'effet de poison sur l'IA
+     */
     public void animatePoisonOnEnemy() {
         animatePoisonEffect(imgIa);
     }
 
+    /**
+     * Méthode publique pour animer l'effet de buff sur le joueur
+     */
     public void animateBuffOnPlayer() { 
         animateBuff(imgPlayer); 
     }
 
+    /**
+     * Méthode publique pour animer l'effet de débuff sur l'ennemi
+     */
     public void animateDebuffOnEnemy() { 
         animateDebuff(imgIa); 
     }
 
+    /**
+     * Méthode publique pour animer l'effet de buff sur l'IA
+     */
     public void animateBuffOnEnemy() { 
         animateBuff(imgIa); 
     }
 
+    /**
+     * Méthode publique pour animer l'effet de débuff sur le joueur
+     */
     public void animateDebuffOnPlayer() { 
         animateDebuff(imgPlayer); 
     }
 
+    /**
+     * Méthode publique qui renvoie un booléen si on lance l'animation ou non (le joueur touche l'ennemi)
+     */
     public void animateHitOnEnemyIfAllowed(boolean canAttack) {
         animateHitOnEnemy(canAttack);
     }
+
+    /**
+     * Méthode publique qui renvoie un booléen si on lance l'animation ou non (l'ennemi touche le joueur)
+     */
     public void animateHitOnPlayerIfAllowed(boolean canAttack) {
         animateHitOnPlayer(canAttack);
     }
 
 
-    /** Sprite du joueur avance pour attaquer — annulé si paralysé */
+    /** 
+     * Sprite du joueur avance pour attaquer — annulé si paralysé 
+     */
     public void animateHitOnEnemy(boolean canAttack) {
         if (!canAttack) {
             // Effet visuel de paralysie
@@ -470,7 +562,9 @@ public class BattleView extends BorderPane {
         shakeScreen();
     }
 
-    /** Sprite de l'ennemi avance pour attaquer — annulé si paralysé */
+    /** 
+     * Sprite de l'ennemi avance pour attaquer — annulé si paralysé 
+     */
     public void animateHitOnPlayer(boolean canAttack) {
         if (!canAttack) {
             animateParalysisEffect(imgIa);
@@ -488,7 +582,9 @@ public class BattleView extends BorderPane {
         shakeScreen();
     }
 
-    /** Clignotement lors des dégâts */
+    /** 
+     * Clignotement lors des dégâts 
+     */
     private void flashSprite(ImageView iv) {
         FadeTransition f = new FadeTransition(Duration.seconds(0.1), iv);
         f.setFromValue(1);
@@ -498,7 +594,9 @@ public class BattleView extends BorderPane {
         f.play();
     }
 
-    /** Animation poison (flash violet) */
+    /** 
+     * Animation poison (flash violet) 
+     */
     public void animatePoisonEffect(ImageView iv) {
         ColorAdjust purple = new ColorAdjust();
         purple.setHue(0.6); // violet
@@ -514,7 +612,9 @@ public class BattleView extends BorderPane {
         f.setOnFinished(e -> iv.setEffect(null)); // reviens à l'état normal
     }
 
-    /** Animation paralysie (flash jaune rapide + micro-shake) */
+    /** 
+     * Animation paralysie (flash jaune rapide + micro-shake) 
+     */
     public void animateParalysisEffect(ImageView iv) {
         ColorAdjust yellow = new ColorAdjust();
         yellow.setHue(-0.25); // jaune
@@ -538,7 +638,9 @@ public class BattleView extends BorderPane {
         f.setOnFinished(e -> iv.setEffect(null));
     }
 
-    /** Tremblement de l'écran */
+    /** 
+     * Tremblement de l'écran 
+     */
     private void shakeScreen() {
         TranslateTransition shake = new TranslateTransition(Duration.seconds(0.05), this);
         shake.setByX(6);
@@ -547,7 +649,9 @@ public class BattleView extends BorderPane {
         shake.play();
     }
 
-    /** Animation : buff appliqué sur soi (aura claire + montée) */
+    /** 
+     * Animation : buff appliqué sur soi (aura claire + montée) 
+     */
     public void animateBuff(ImageView sprite) {
 
         // légère montée
@@ -578,7 +682,9 @@ public class BattleView extends BorderPane {
         pt.play();
     }
 
-    /** Animation : debuff appliqué à l'ennemi (assombrissement + contraction) */
+    /** 
+     * Animation : debuff appliqué à l'ennemi (assombrissement + contraction) 
+     */
     public void animateDebuff(ImageView sprite) {
 
         // assombrissement
