@@ -1,0 +1,14 @@
+.battle-background {
+    -fx-background-image: url("/images/background.png");
+    -fx-background-size: 75% 75%;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: bottom center;
+}
+
+.enemy-hp-bar .bar {
+    -fx-background-color: linear-gradient(#ff5a5a, #c70000);
+}
+
+.player-hp-bar .bar {
+    -fx-background-color: linear-gradient(#4f62f0, #6676ef);
+}
