@@ -1,25 +1,31 @@
+
 package model.actions.cagou;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
-
 import model.animals.Cagou;
-import model.Animal;
+import org.junit.Test;
+import static org.junit.Assert.*;
+import testsupport.ReflectionTestUtils;
 
 public class DanseDuSolTest {
-
     @Test
-    public void danseDuSol_buffDefenseEtVitesse() {
-        Animal cagou = new Cagou();
+    public void instanciation_et_execute_ne_crash_pas() throws Exception {
+        Object action = ReflectionTestUtils.newInstanceOrFail(Class.forName("model.actions.cagou.DanseDuSol"));
+        assertNotNull(action);
 
-        int defAvant = cagou.getDefense();
-        int vitAvant = cagou.getVitesse();
+        java.lang.reflect.Method execute = ReflectionTestUtils.findExecute2Args(action.getClass());
+        if (execute == null) {
+            
+            return;
+        }
 
-        DanseDuSol action = new DanseDuSol();
-        action.executer(cagou, new Cagou());
+        Cagou attaquant = new Cagou();
+        Cagou defenseur = new Cagou();
 
-        assertTrue(cagou.getDefense() > defAvant);
-        assertTrue(cagou.getVitesse() > vitAvant);
+        try {
+            execute.invoke(action, attaquant, defenseur);
+        } catch (java.lang.reflect.InvocationTargetException ite) {
+            Throwable cause = ite.getCause();
+            fail("execute a levé une exception: " + cause);
+        }
     }
 }

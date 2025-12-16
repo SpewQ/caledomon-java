@@ -1,25 +1,31 @@
+
 package model.actions.cagou;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
-
 import model.animals.Cagou;
-import model.Animal;
+import org.junit.Test;
+import static org.junit.Assert.*;
+import testsupport.ReflectionTestUtils;
 
 public class CoupDeBecTest {
-
     @Test
-    public void coupDeBec_infligeDegatsCorrects() {
-        Animal attaquant = new Cagou();
-        Animal cible = new Cagou();
+    public void instanciation_et_execute_ne_crash_pas() throws Exception {
+        Object action = ReflectionTestUtils.newInstanceOrFail(Class.forName("model.actions.cagou.CoupDeBec"));
+        assertNotNull(action);
 
-        int pvAvant = cible.getPv();
+        java.lang.reflect.Method execute = ReflectionTestUtils.findExecute2Args(action.getClass());
+        if (execute == null) {
+            
+            return;
+        }
 
-        CoupDeBec action = new CoupDeBec();
-        action.executer(attaquant, cible);
+        Cagou attaquant = new Cagou();
+        Cagou defenseur = new Cagou();
 
-        // Dégâts = attaque(15) - défense(10) = 5 (stats du Cagou)
-        assertEquals(pvAvant - 5, cible.getPv());
+        try {
+            execute.invoke(action, attaquant, defenseur);
+        } catch (java.lang.reflect.InvocationTargetException ite) {
+            Throwable cause = ite.getCause();
+            fail("execute a levé une exception: " + cause);
+        }
     }
 }

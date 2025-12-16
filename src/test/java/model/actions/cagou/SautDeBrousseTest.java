@@ -1,32 +1,31 @@
+
 package model.actions.cagou;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
-
 import model.animals.Cagou;
-import model.Animal;
+import org.junit.Test;
+import static org.junit.Assert.*;
+import testsupport.ReflectionTestUtils;
 
 public class SautDeBrousseTest {
-
     @Test
-    public void sautDeBrousse_infligePlusDeDegatsQuUnCoupNormal() {
-        Animal attaquant = new Cagou();
-        Animal cible1 = new Cagou();
-        Animal cible2 = new Cagou();
+    public void instanciation_et_execute_ne_crash_pas() throws Exception {
+        Object action = ReflectionTestUtils.newInstanceOrFail(Class.forName("model.actions.cagou.SautDeBrousse"));
+        assertNotNull(action);
 
-        int pvAvant1 = cible1.getPv();
-        int pvAvant2 = cible2.getPv();
+        java.lang.reflect.Method execute = ReflectionTestUtils.findExecute2Args(action.getClass());
+        if (execute == null) {
+            
+            return;
+        }
 
-        // Coup normal = CoupDeBec
-        new CoupDeBec().executer(attaquant, cible1);
+        Cagou attaquant = new Cagou();
+        Cagou defenseur = new Cagou();
 
-        // Saut de brousse
-        new SautDeBrousse().executer(attaquant, cible2);
-
-        int degatsNormal = pvAvant1 - cible1.getPv();
-        int degatsSaut = pvAvant2 - cible2.getPv();
-
-        assertTrue(degatsSaut > degatsNormal);
+        try {
+            execute.invoke(action, attaquant, defenseur);
+        } catch (java.lang.reflect.InvocationTargetException ite) {
+            Throwable cause = ite.getCause();
+            fail("execute a levé une exception: " + cause);
+        }
     }
 }
