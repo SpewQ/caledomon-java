@@ -102,8 +102,8 @@ Méthode 1 : via Maven (recommandée)
 mvn javafx:run
 ```
 
-```bash
 Méthode 2 : via le JAR généré
+```bash
 java -jar target/caledomon-1.0-SNAPSHOT.jar
 ```
 
